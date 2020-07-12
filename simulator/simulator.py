@@ -3,6 +3,7 @@ import time
 import math
 import os
 import itertools
+import json
 from multiprocessing import Pool
 
 # Globals
@@ -123,9 +124,19 @@ def get_player_id(str_filepath, str_suffix='.csv'):
 def main():
     start_time = time.perf_counter()
     
-    # get the player data to a json object
     print('{} - Preparing data - start'.format(time.perf_counter()))
-    dct_data = create_data_json(os.path.join(os.getcwd(), 'data'))
+    
+    #create json object out of the files
+    # '..' -> one folder up
+    print(os.path.join(os.path.dirname( __file__ ), '..', 'data'))
+    dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), '..', 'data'))
+    #write to file
+    with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
+        json.dump(dct_data, outfile)
+
+    #what to do in a list
+    #key: 'work'     
+    # #[0] ["7", "home", "C:\\Users\\pasca\\HV\\github\\SemesterarbeitCASBGD\\data\\home\\7.csv"]
     work = dct_data[STR_WORK]
 
     print('{} - Preparing data - end'.format(time.perf_counter()))

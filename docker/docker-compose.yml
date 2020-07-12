@@ -1,0 +1,38 @@
+# =====================================================
+# Platform: STREAMTEAM default
+# =====================================================
+version: '3'
+# enforce some dependencies
+# enforce some dependencies
+services:
+#  ================================== Simulator ============================ #}
+  simulator-1:
+    image: confluentinc/cp-zookeeper:5.5.0
+    container_name: zookeeper-1
+    hostname: zookeeper-1
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
+    command:
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash
+      - -c
+      - |
+        echo "Installing Connectors"
+      #  for i in $$(echo "confluentinc/kafka-connect-elasticsearch:5.5.0" | sed "s/,/ /g")
+      #  do
+      #    confluent-hub install --no-prompt --component-dir /etc/kafka-connect/addl-plugins --verbose "$$i"
+      #  done
+      #  #
+      #  echo "Launching Kafka Connect worker"
+      #  /etc/confluent/docker/run &
+      #  #
+      #  sleep infinity
