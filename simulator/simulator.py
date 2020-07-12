@@ -128,7 +128,6 @@ def main():
     
     #create json object out of the files
     # '..' -> one folder up
-    #print(os.path.join(os.path.dirname( __file__ ), 'data'))
     dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
     #write to file
     with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
