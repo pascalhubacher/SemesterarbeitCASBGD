@@ -7,7 +7,7 @@ version: '3'
 services:
 #  ================================== Simulator ============================ #}
   simulator-1:
-    image: confluentinc/cp-zookeeper:5.5.0
+    image: python
     container_name: zookeeper-1
     hostname: zookeeper-1
     ports:

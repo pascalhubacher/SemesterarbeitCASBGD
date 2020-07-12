@@ -112,8 +112,8 @@ def create_data_json(filepath):
                 
                 number_of_elements += 1
             
-            dct_data[STR_NUMBER_OF_ELEMENTS] = number_of_elements
-            dct_data[STR_WORK] = tpl_work
+    dct_data[STR_NUMBER_OF_ELEMENTS] = number_of_elements
+    dct_data[STR_WORK] = tpl_work
     return(dct_data)
 
 # get the player id back from the filename
@@ -128,8 +128,8 @@ def main():
     
     #create json object out of the files
     # '..' -> one folder up
-    print(os.path.join(os.path.dirname( __file__ ), '..', 'data'))
-    dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), '..', 'data'))
+    #print(os.path.join(os.path.dirname( __file__ ), 'data'))
+    dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
     #write to file
     with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
         json.dump(dct_data, outfile)
