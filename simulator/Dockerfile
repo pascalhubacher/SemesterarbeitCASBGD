@@ -1,18 +1,26 @@
+###############################################################################
 # use an existing docker image 
 FROM python:3
 
 WORKDIR /usr/src/app
 
+###############################################################################
 # download and instll dependencies
-COPY requirements.txt ./
+
+# install git
+RUN apt-get update && apt-get install -y git
+
+# clone repository with data
+RUN git clone https://github.com/pascalhubacher/SemesterarbeitCASBGD.git
+
+# change directory to the simulator folder 
+WORKDIR "/usr/src/app/SemesterarbeitCASBGD/simulator"
+
+# install the needed python packages 
 RUN pip install --no-cache-dir -r requirements.txt
 
-#copy the python script to the simulator
-COPY simulator.py .
+###############################################################################
+# start the simulator
+CMD [ "python", "./simulator.py" ]
 
-#copy the data to the simulator
-COPY data ./data
-
-# tell the image what to do when it starts
-# as a container
-#CMD [ "python", "./simulator.py" ]
+#docker build .
