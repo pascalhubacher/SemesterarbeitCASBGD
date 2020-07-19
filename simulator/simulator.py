@@ -56,7 +56,7 @@ def create_data_json(filepath):
     tpl_work = ()
  
     walker = os.walk(filepath)
-    for root, dirs, files in walker:
+    for root, _dirs, files in walker:
        for file_ in files:
             path = os.path.join(root, file_)
 
@@ -130,8 +130,8 @@ def main():
     # '..' -> one folder up
     dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
     #write to file
-    with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
-        json.dump(dct_data, outfile)
+    #with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
+    #    json.dump(dct_data, outfile)
 
     #what to do in a list
     #key: 'work'     

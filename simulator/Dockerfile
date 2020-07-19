@@ -26,4 +26,4 @@ WORKDIR "/usr/src/app/SemesterarbeitCASBGD/simulator"
 #CMD [ "python3", "./simulator.py" ]
 
 #docker build -t pascalhubacher/simulator:latest .
-#docker run -it id sh
+#docker run -it pascalhubacher/simulator sh
