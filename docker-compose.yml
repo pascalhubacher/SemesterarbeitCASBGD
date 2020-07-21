@@ -12,6 +12,8 @@ services:
     #stdin_open: true
     hostname: simulator-1
     tty: "true"
+    volumes:
+      - ./data-transfer:/data-transfer
 
   #  ================================== Zookeeper ========================================== #}
   zookeeper-1:
@@ -157,4 +159,3 @@ services:
   #      /etc/confluent/docker/run &
   #      #
   #      sleep infinity
-  

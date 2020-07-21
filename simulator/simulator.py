@@ -4,11 +4,16 @@ import math
 import os
 import itertools
 import json
+import re
 from multiprocessing import Pool
+from confluent_kafka import Producer
 
 # Globals
 # JSON keys
 STR_PATH = 'path'
+STR_MATCH_ID = 'match_id'
+STR_PITCH_X = 'fPitchXSizeMeters'
+STR_PITCH_Y = 'fPitchYSizeMeters'
 STR_CONFIG_PROPERTIES = 'config.properties'
 STR_NUMBER_OF_ELEMENTS = 'number_of_elements'
 STR_WORK = 'work'
@@ -20,7 +25,41 @@ STR_OTHER = 'other'
 #time laps
 INT_TIME_LAPS = 1
 
+def send_to_kafkaproducer(ip, port, messages, topic, key = '1'):
+    #############################
+    # confluent kafka Producer
+    #############################
 
+    p = Producer({'bootstrap.servers': ip+'localhost:'+port})
+
+    def delivery_report(err, msg):
+        """ Called once for each message produced to indicate delivery result.
+            Triggered by poll() or flush(). """
+        if err is not None:
+            print('Message delivery failed: {}'.format(err))
+        else:
+            print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+
+    for data in messages:
+        # Trigger any available delivery report callbacks from previous produce() calls
+        p.poll(0)
+
+        # Asynchronously produce a message, the delivery report callback
+        # will be triggered from poll() above, or flush() below, when the message has
+        # been successfully delivered or failed permanently.
+        
+        # No Key
+        #p.produce(topic, data.encode('utf-8'), callback=delivery_report)
+        
+        # Key = '1'
+        p.produce(topic
+                , key=key
+                , value = data.encode('utf-8')
+                , callback=delivery_report)
+
+    # Wait for any outstanding messages to be delivered and delivery report
+    # callbacks to be triggered.
+    p.flush()
 
 def execute_log_data(data_log):
     print(' Process player id {} team ({}) started'.format(data_log[0], data_log[1]))
@@ -31,7 +70,7 @@ def execute_log_data(data_log):
     i = 0
     for line in lines[1:]: 
         i += 1
-        if i <= 500:
+        if i <= 50:
             #print(line.strip())
             #40ms -> 40/1000 -> 0.04s
             #the time in the log is cummulated so the last time vales is subtracted each time to get the delta time
@@ -39,7 +78,12 @@ def execute_log_data(data_log):
             time.sleep((int(line.strip().split(',')[0])- time_elapsed)/1000/INT_TIME_LAPS)
             #the last time value
             time_elapsed = int(line.strip().split(',')[0])
-        
+
+            #"Timestamp","X"  ,"Y" ,"Z","ID"
+            #         40,50.92,1.15,0.0,101
+            send_to_kafkaproducer('localhost', '9092', messages, topic)
+
+
         #do something
 
     print(' Process player id {} team ({}) finished'.format(data_log[0], data_log[1]))
@@ -61,10 +105,20 @@ def create_data_json(filepath):
     for root, _dirs, files in walker:
        for file_ in files:
             path = os.path.join(root, file_)
+            
+            if STR_CONFIG_PROPERTIES in path:
+                dct_data[STR_CONFIG_PROPERTIES] = {}
+                dct_data[STR_CONFIG_PROPERTIES][STR_PATH] = path
+                #properties auslesen
+                #TracabMetaData.match.iId = "19060518"
+                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID] = get_properties(path,'TracabMetaData.match.iId')
+                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_X] = get_properties(path,'TracabMetaData.match.'+STR_PITCH_X)
+                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_Y] = get_properties(path,'TracabMetaData.match.'+STR_PITCH_Y)
 
-            player_id = str(get_player_id(path))
+            elif STR_HOME in path:
+                #not the properties file
+                player_id = str(get_player_id(path))
 
-            if STR_HOME in path:
                 dct_data[STR_HOME][player_id] =  {}
                 dct_data[STR_HOME][player_id][STR_PATH] = path
 
@@ -75,11 +129,11 @@ def create_data_json(filepath):
                 else:
                     dct_data[STR_HOME][STR_NUMBER_OF_ELEMENTS] = int(dct_data[STR_HOME][STR_NUMBER_OF_ELEMENTS]) + 1
                 
-                number_of_elements += 1
-            elif STR_CONFIG_PROPERTIES in path:
-                dct_data[STR_CONFIG_PROPERTIES] = path
-
+                number_of_elements += 1          
             elif STR_AWAY in path:
+                #not the properties file
+                player_id = str(get_player_id(path))
+                
                 dct_data[STR_AWAY][player_id] =  {}
                 dct_data[STR_AWAY][player_id][STR_PATH] = path
 
@@ -92,6 +146,9 @@ def create_data_json(filepath):
                 
                 number_of_elements += 1
             elif STR_BALL in path:
+                #not the properties file
+                player_id = str(get_player_id(path))
+
                 dct_data[STR_BALL][player_id] =  {}
                 dct_data[STR_BALL][player_id][STR_PATH] = path
                 
@@ -123,6 +180,16 @@ def create_data_json(filepath):
 def get_player_id(str_filepath, str_suffix='.csv'):
     return(str_filepath[str_filepath.rfind('\\')+1:-len(str_suffix)])
     
+def get_properties(str_filepath, str_parameter):
+    with open(str_filepath, 'r') as f:
+        lines = f.readlines() 
+  
+        # Strips the newline character 
+        for line in lines:
+            if str_parameter in line:
+                return(line[line.find('"')+1:].strip()[:-1])
+    return('')
+
 def main():
     start_time = time.perf_counter()
     
