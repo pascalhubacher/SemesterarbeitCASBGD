@@ -29,8 +29,7 @@ services:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
   # make sure that internal replication factor is not larger than the number of Kafka nodes
-
-  #  ================================== Kafka ========================================== #}
+   #  ================================== Kafka ========================================== #}
   kafka-1:
     image: confluentinc/cp-kafka:5.5.0
     container_name: kafka-1
@@ -49,7 +48,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-1:19092,LISTENER_DOCKERHOST://localhost:29092,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      #if we have more nodes then the replication factior can be risen
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
@@ -135,6 +135,8 @@ services:
       - 8081:8081
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper-1:2181
+      SCHEMA_REGISTRY_DEBUG: true
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:19092
       SCHEMA_REGISTRY_MASTER_ELIGIBILITY: 'true'
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
@@ -200,96 +202,18 @@ services:
         /etc/confluent/docker/run &
         #
         sleep infinity
-  kafka-connect-2:
-    image: confluentinc/cp-kafka-connect:5.5.0
-    container_name: kafka-connect-2
-    labels:
-      com.mdps.service.restapi.url: http://${PUBLIC_IP}:8084
-    depends_on:
-      - zookeeper-1
-      - kafka-1
-      - schema-registry-1
-    ports:
-      - 8084:8084
-    environment:
-      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092
-      CONNECT_REST_PORT: 8084
-      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect-2
-      CONNECT_GROUP_ID: kafka-connect
-      CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
-      CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
-      CONNECT_STATUS_STORAGE_TOPIC: _connect-status
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
-      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
-      CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
-      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
-      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-#      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
-      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
-      CONNECT_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
-      CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: '[%d] %p %X{connector.context}%m (%c:%L)%n'
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
-      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
-      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/addl-plugins
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
-    restart: unless-stopped
-  #  ================================== ksqlDB ========================================== #}
-  ksqldb-server-1:
-    image: confluentinc/ksqldb-server:0.9.0
-    hostname: ksqldb-server-1
-    container_name: ksqldb-server-1
-    labels:
-      com.mdps.service.restapi.url: http://${PUBLIC_IP}:8088
-    ports:
-      - 8088:8088
-    depends_on:
-      - kafka-1
-      - schema-registry-1
-    environment:
-      KSQL_CONFIG_DIR: /etc/ksql
-      KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties
-      KSQL_BOOTSTRAP_SERVERS: kafka-1:19092
-      KSQL_HOST_NAME: ksqldb-server-1
-      KSQL_APPLICATION_ID: kafka-demo
-      KSQL_LISTENERS: http://0.0.0.0:8088
-      KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
-      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
-      KSQL_KSQL_SERVICE_ID: kafka-demo
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./plugins/ksql:/etc/ksql/ext
-    restart: unless-stopped
-  ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.9.0
-    container_name: ksqldb-cli
-    hostname: ksqldb-cli
-    depends_on:
-      - ksqldb-server-1
-    volumes:
-      - ./data-transfer:/data-transfer
-    entrypoint: /bin/sh
-    tty: true
   #  ================================== Kafkacat  ========================================== #}
-  kafkacat:
-    image: edenhill/kafkacat:1.5.0
-    container_name: kafkacat
-    hostname: kafkacat
-    volumes:
-      - ./data-transfer:/data-transfer
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        apk add jq;
-        while [ 1 -eq 1 ];do sleep 60;done
-    restart: unless-stopped
-  #  ================================== Schema Registry UI ====================================
+  #kafkacat:
+  #  image: edenhill/kafkacat:1.5.0
+  #  container_name: kafkacat
+  #  hostname: kafkacat
+  #  volumes:
+  #    - ./data-transfer:/data-transfer
+  #  entrypoint:
+  #    - /bin/sh
+  #    - -c
+  #    - |
+  #      apk add jq;
+  #      while [ 1 -eq 1 ];do sleep 60;done
+  #  restart: unless-stopped
+  #  ================================== Schema Registry UI ==================================== #}
