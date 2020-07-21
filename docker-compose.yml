@@ -11,6 +11,7 @@ services:
       dockerfile: Dockerfile
     #stdin_open: true
     hostname: simulator-1
+    tty: "true"
 
   #  ================================== Zookeeper ========================================== #}
   zookeeper-1:
@@ -60,6 +61,20 @@ services:
       KAFKA_JMX_HOSTNAME: kafka-1
     volumes:
       - ./data-transfer:/data-transfer
+    restart: unless-stopped
+#  ================================== Kafkacat  ========================================== #}
+  kafkacat:
+    image: edenhill/kafkacat:1.5.0
+    container_name: kafkacat
+    hostname: kafkacat
+    volumes:
+      - ./data-transfer:/data-transfer
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        apk add jq;
+        while [ 1 -eq 1 ];do sleep 60;done
     restart: unless-stopped
   #  ================================== Schema Registry ========================================== #}
 #  schema-registry-1:
@@ -142,18 +157,4 @@ services:
   #      /etc/confluent/docker/run &
   #      #
   #      sleep infinity
-  #  ================================== Kafkacat  ========================================== #}
-  #kafkacat:
-  #  image: edenhill/kafkacat:1.5.0
-  #  container_name: kafkacat
-  #  hostname: kafkacat
-  #  volumes:
-  #    - ./data-transfer:/data-transfer
-  #  entrypoint:
-  #    - /bin/sh
-  #    - -c
-  #    - |
-  #      apk add jq;
-  #      while [ 1 -eq 1 ];do sleep 60;done
-  #  restart: unless-stopped
-  #  ================================== Schema Registry UI ==================================== #}
+  
