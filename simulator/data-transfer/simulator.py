@@ -25,7 +25,7 @@ STR_OTHER = 'other'
 #time laps
 INT_TIME_LAPS = 1
 
-def send_to_kafkaproducer(ip, port, messages, topic, key = '1'):
+def send_to_kafkaproducer(ip, port, message, topic, key = '1'):
     #############################
     # confluent kafka Producer
     #############################
@@ -38,24 +38,24 @@ def send_to_kafkaproducer(ip, port, messages, topic, key = '1'):
         if err is not None:
             print('Message delivery failed: {}'.format(err))
         else:
-            print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+            #print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+            pass
 
-    for data in messages:
-        # Trigger any available delivery report callbacks from previous produce() calls
-        p.poll(0)
+    # Trigger any available delivery report callbacks from previous produce() calls
+    p.poll(0)
 
-        # Asynchronously produce a message, the delivery report callback
-        # will be triggered from poll() above, or flush() below, when the message has
-        # been successfully delivered or failed permanently.
-        
-        # No Key
-        #p.produce(topic, data.encode('utf-8'), callback=delivery_report)
-        
-        # Key = '1'
-        p.produce(topic
-                , key=key
-                , value = data.encode('utf-8')
-                , callback=delivery_report)
+    # Asynchronously produce a message, the delivery report callback
+    # will be triggered from poll() above, or flush() below, when the message has
+    # been successfully delivered or failed permanently.
+    
+    # No Key
+    #p.produce(topic, data.encode('utf-8'), callback=delivery_report)
+    
+    # Key = '1'
+    p.produce(str(topic)
+            , key=str(key)
+            , value = message.encode('utf-8')
+            , callback=delivery_report)
 
     # Wait for any outstanding messages to be delivered and delivery report
     # callbacks to be triggered.
@@ -82,7 +82,7 @@ def execute_log_data(data_log):
             #"Timestamp","X"  ,"Y" ,"Z","ID"
             #         40,50.92,1.15,0.0,101
             #dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID]
-            send_to_kafkaproducer('localhost', '9092', line.strip(), 'test-topic')
+            send_to_kafkaproducer('kafka-1', '9092', line.strip(), 'test-topic')
 
 
         #do something
@@ -215,6 +215,7 @@ def main():
 
     # 2 x 11 players and the ball -> 23
     num_processes = int(dct_data[STR_NUMBER_OF_ELEMENTS])
+    print(num_processes)
     #num_processes = 1
 
     with Pool(processes=num_processes) as pool:

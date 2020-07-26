@@ -1,9 +1,10 @@
 ###############################################################################
 # use an existing docker image 
 #alpine image latest
-FROM alpine:edge
+FROM python:3
 
 RUN mkdir -p /usr/src/app
+#RUN mkdir -p /usr/src/app/data-transfer
 WORKDIR /usr/src/app
 
 ###############################################################################
@@ -13,15 +14,9 @@ WORKDIR /usr/src/app
 #RUN apk add --update git
 
 # install python 3
-RUN apk add --update python3
+#RUN apk add --update python3
 #install pip
-RUN apk add --update py3-pip
-
-RUN apk update && apk add --no-cache python3 librdkafka && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools && \
-    rm -r /root/.cache
+#RUN apk add --update py3-pip
 
 # clone repository with data
 #RUN git clone https://github.com/pascalhubacher/SemesterarbeitCASBGD.git
@@ -31,11 +26,12 @@ COPY ./simulator.py .
 
 #copy the list of all packages to be installed
 COPY ./requirements.txt .
+#RUN pip3 install --no-cache-dir -r requirements.txt
 
 #copy all the game data to the image
 COPY ./data/ ./data/
 
-#RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # change directory to the simulator folder 
 #WORKDIR "/usr/src/app/simulator"

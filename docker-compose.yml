@@ -11,10 +11,13 @@ services:
       dockerfile: Dockerfile
     #stdin_open: true
     hostname: simulator-1
+    depends_on:
+      - zookeeper-1
+      - kafka-1
     tty: "true"
     volumes:
-      - ./data-transfer:/data-transfer
-
+      - C:/Users/pasca/HV/github/SemesterarbeitCASBGD/simulator/data-transfer:/usr/src/app/data-transfer
+ 
   #  ================================== Zookeeper ========================================== #}
   zookeeper-1:
     image: confluentinc/cp-zookeeper:5.5.0
@@ -77,6 +80,31 @@ services:
       - |
         apk add jq;
         while [ 1 -eq 1 ];do sleep 60;done
+    restart: unless-stopped
+  #  ================================== Apache Kafka HQ (AKHQ) ========================================== #}
+  akhq:
+    image: tchiotludo/akhq:latest
+    container_name: akhq
+    hostname: akhq
+    labels:
+      com.mdps.service.webui.url: http://${PUBLIC_IP}:28107
+    ports:
+      - 28107:8080
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "kafka-1:19092"
+              schema-registry:
+                url: "http://schema-registry-1:8081"
+              connect:
+                url: "http://kafka-connect-1:8083"
+    depends_on:
+      - kafka-1
+    volumes:
+      - ./data-transfer:/data-transfer
     restart: unless-stopped
   #  ================================== Schema Registry ========================================== #}
 #  schema-registry-1:
@@ -159,3 +187,18 @@ services:
   #      /etc/confluent/docker/run &
   #      #
   #      sleep infinity
+
+#docker-compose up --build --remove-orphans
+#docker-compose down
+
+#docker-compose start
+#docker-compose stop
+
+#docker exec -ti kafka-1 bash
+#root@kafka-1:/# kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --topic test-topic --partitions 1 --replication-factor 1
+
+#docker exec -it semesterarbeitcasbgd_simulator-1_1 bash
+#root@simulator-1:/usr/src/app# cp ./data-transfer/simulator.py .
+#root@simulator-1:/usr/src/app# python3 simulator.py
+
+
