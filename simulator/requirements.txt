@@ -1,1 +1,3 @@
 confluent_kafka
+avro
+requests

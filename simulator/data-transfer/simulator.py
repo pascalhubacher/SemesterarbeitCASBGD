@@ -6,7 +6,17 @@ import itertools
 import json
 import re
 from multiprocessing import Pool
-from confluent_kafka import Producer
+from confluent_kafka import Producer, Consumer, admin
+#Admin -> get/create/delete topics
+from confluent_kafka.admin import AdminClient, NewTopic
+#AVRO
+from confluent_kafka import avro
+#AVRO Producer
+from confluent_kafka.avro import AvroProducer
+#AVRO Consumer
+from confluent_kafka.avro import AvroConsumer
+from confluent_kafka.avro.serializer import SerializerError
+
 
 # Globals
 # JSON keys
@@ -25,7 +35,48 @@ STR_OTHER = 'other'
 #time laps
 INT_TIME_LAPS = 1
 
-def send_to_kafkaproducer(ip, port, message, topic, key = '1'):
+#create kafka topics
+def kafka_topics_create(ip, port, topic_list):
+    kadmin = AdminClient({
+        'bootstrap.servers': ip+':'+port
+    })
+    #create the topic list 
+    kadmin.create_topics(new_topics=topic_list, validate_only=False)
+
+#list kafka topics
+def kafka_topics_get(ip, port):
+    kadmin = AdminClient({
+        'bootstrap.servers': ip+':'+port
+    })
+    #Returns a dict(). See example below.
+    #{'topic01': TopicMetadata(topic01, 3 partitions),}
+    return(kadmin.list_topics().topic_list)
+    
+#read messages from kafka
+def kafka_consumer(ip, port, message, topic, group_id = 'mygroup'):
+    c = Consumer({
+        'bootstrap.servers': ip+':'+port,
+        'group.id': group_id,
+        'auto.offset.reset': 'earliest'
+    })
+
+    c.subscribe([topic])
+
+    while True:
+        msg = c.poll(1.0)
+
+        if msg is None:
+            continue
+        if msg.error():
+            print("Consumer error: {}".format(msg.error()))
+            continue
+
+        print('Received message: {}'.format(msg.value().decode('utf-8')))
+
+    c.close()
+
+#write messages to kafka
+def kafka_producer(ip, port, message, topic, key = '1'):
     #############################
     # confluent kafka Producer
     #############################
@@ -61,6 +112,7 @@ def send_to_kafkaproducer(ip, port, message, topic, key = '1'):
     # callbacks to be triggered.
     p.flush()
 
+#read data file and execute line by line waiting in between. write to kafka
 def execute_log_data(data_log):
     print(' Process player id {} team ({}) started'.format(data_log[0], data_log[1]))
     with open(data_log[2]) as f:
@@ -82,7 +134,7 @@ def execute_log_data(data_log):
             #"Timestamp","X"  ,"Y" ,"Z","ID"
             #         40,50.92,1.15,0.0,101
             #dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID]
-            send_to_kafkaproducer('kafka-1', '9092', line.strip(), 'test-topic')
+            kafka_producer('kafka-1', '9092', line.strip(), 'test-topic')
 
 
         #do something
@@ -203,6 +255,17 @@ def main():
     with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
         json.dump(dct_data, outfile)
 
+    kafka_topic = 'test-topic'
+    #create kafka topic if not existent
+    #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
+    print(kafka_topics_get('kafka-1', '9092'))
+    if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
+            #create kafka topic(s)
+            print('create kafka topic ('+kafka_topic+') as it does not exist.')
+            topic_list = []
+            topic_list.append(NewTopic(name=kafka_topic, num_partitions=1, replication_factor=1))
+            #kafka_topics_create('kafka-1', '9092', topic_list)
+
     #what to do in a list
     #key: 'work'     
     # #[0] ["7", "home", "C:\\Users\\pasca\\HV\\github\\SemesterarbeitCASBGD\\data\\home\\7.csv"]
@@ -219,7 +282,8 @@ def main():
     #num_processes = 1
 
     with Pool(processes=num_processes) as pool:
-        pool.map(execute_log_data, work)
+        #pool.map(execute_log_data, work)
+        pass
     
     print('{} - Starting to send data in parallel - end'.format(time.perf_counter()))
 

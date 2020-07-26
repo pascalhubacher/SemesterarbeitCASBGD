@@ -4,7 +4,6 @@
 FROM python:3
 
 RUN mkdir -p /usr/src/app
-#RUN mkdir -p /usr/src/app/data-transfer
 WORKDIR /usr/src/app
 
 ###############################################################################
