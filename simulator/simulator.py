@@ -70,7 +70,7 @@ def execute_log_data(data_log):
     i = 0
     for line in lines[1:]: 
         i += 1
-        if i <= 50:
+        if i <= 5:
             #print(line.strip())
             #40ms -> 40/1000 -> 0.04s
             #the time in the log is cummulated so the last time vales is subtracted each time to get the delta time
@@ -81,7 +81,8 @@ def execute_log_data(data_log):
 
             #"Timestamp","X"  ,"Y" ,"Z","ID"
             #         40,50.92,1.15,0.0,101
-            send_to_kafkaproducer('localhost', '9092', messages, topic)
+            #dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID]
+            send_to_kafkaproducer('localhost', '9092', line.strip(), 'test-topic')
 
 
         #do something
