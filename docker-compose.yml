@@ -1,6 +1,20 @@
 # =====================================================
 # Platform: STREAMTEAM default
 # =====================================================
+
+#docker-compose up --build --remove-orphans
+#docker-compose down
+
+#docker-compose start
+#docker-compose stop
+
+#docker exec -ti kafka-1 bash
+#root@kafka-1:/# kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --topic test-topic --partitions 1 --replication-factor 1
+
+#docker exec -it semesterarbeitcasbgd_simulator-1_1 bash
+#root@simulator-1:/usr/src/app# cp ./data-transfer/simulator.py .
+#root@simulator-1:/usr/src/app# python3 simulator.py
+
 version: '3'
 # enforce some dependencies
 services:
@@ -64,6 +78,28 @@ services:
       KAFKA_JMX_PORT: 9992
       KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9992
       KAFKA_JMX_HOSTNAME: kafka-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
+#  ================================== Schema Registry ========================================== #}
+  schema-registry-1:
+    image: confluentinc/cp-schema-registry:5.5.0
+    hostname: schema-registry-1
+    container_name: schema-registry-1
+    labels:
+      com.mdps.service.restapi.url: http://${PUBLIC_IP}:8081
+    depends_on:
+      - zookeeper-1
+      - kafka-1
+    ports:
+      - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:19092
+      SCHEMA_REGISTRY_MASTER_ELIGIBILITY: 'true'
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,OPTIONS
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
@@ -187,18 +223,3 @@ services:
   #      /etc/confluent/docker/run &
   #      #
   #      sleep infinity
-
-#docker-compose up --build --remove-orphans
-#docker-compose down
-
-#docker-compose start
-#docker-compose stop
-
-#docker exec -ti kafka-1 bash
-#root@kafka-1:/# kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --topic test-topic --partitions 1 --replication-factor 1
-
-#docker exec -it semesterarbeitcasbgd_simulator-1_1 bash
-#root@simulator-1:/usr/src/app# cp ./data-transfer/simulator.py .
-#root@simulator-1:/usr/src/app# python3 simulator.py
-
-

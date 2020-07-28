@@ -35,16 +35,38 @@ STR_OTHER = 'other'
 #time laps
 INT_TIME_LAPS = 1
 
+#create kafka topics
+def kafka_topics_create(ip, port, topic_list):
+    a = AdminClient({
+        'bootstrap.servers': ip+':'+port
+    })
+
+    new_topics = [NewTopic(topic, num_partitions=3, replication_factor=1) for topic in topic_list]
+    # Note: In a multi-cluster production scenario, it is more typical to use a replication_factor of 3 for durability.
+
+    # Call create_topics to asynchronously create topics. A dict
+    # of <topic,future> is returned.
+    fs = a.create_topics(new_topics)
+
+    # Wait for each operation to finish.
+    for topic, f in fs.items():
+        try:
+            f.result()  # The result itself is None
+            print("Topic {} created".format(topic))
+        except Exception as e:
+            print("Failed to create topic {}: {}".format(topic, e))
+    
 #list kafka topics
 def kafka_topics_get(ip, port):
     kadmin = AdminClient({
-        'bootstrap.servers': ip+':'+port,
+        'bootstrap.servers': ip+':'+port
     })
+
     #Returns a dict(). See example below.
     #{'topic01': TopicMetadata(topic01, 3 partitions),}
     return(kadmin.list_topics().topics)
     
-#read messages from kafka
+#Consumer - read messages from kafka
 def kafka_consumer(ip, port, message, topic, group_id = 'mygroup'):
     c = Consumer({
         'bootstrap.servers': ip+':'+port,
@@ -67,7 +89,7 @@ def kafka_consumer(ip, port, message, topic, group_id = 'mygroup'):
 
     c.close()
 
-#write messages to kafka
+#Producer - write messages to kafka
 def kafka_producer(ip, port, message, topic, key = '1'):
     #############################
     # confluent kafka Producer
@@ -104,6 +126,62 @@ def kafka_producer(ip, port, message, topic, key = '1'):
     # callbacks to be triggered.
     p.flush()
 
+#AVRO Consumer - read messages from kafka (schema registry needed)
+
+#AVRO Producer - write messages to kafka (schema registry needed)
+def kafka_producer_avro(ip, port, value, topic, key='1', schema_registry='http://schema-registry-1:8081'):
+    value_schema_str = """
+    {
+    "namespace": "my.test",
+    "name": "value",
+    "type": "record",
+    "fields" : [
+        {
+        "name" : "name",
+        "type" : "string"
+        }
+    ]
+    }
+    """
+
+    key_schema_str = """
+    {
+    "namespace": "my.test",
+    "name": "key",
+    "type": "record",
+    "fields" : [
+        {
+        "name" : "name",
+        "type" : "string"
+        }
+    ]
+    }
+    """
+
+    value_schema = avro.loads(value_schema_str)
+    key_schema = avro.loads(key_schema_str)
+    value = {"name": "Value"}
+    key = {"name": "Key"}
+
+
+    def delivery_report(err, msg):
+        """ Called once for each message produced to indicate delivery result.
+            Triggered by poll() or flush(). """
+        if err is not None:
+            print('Message delivery failed: {}'.format(err))
+        else:
+            print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+
+
+    avroProducer = AvroProducer({
+        'bootstrap.servers': ip+':'+port,
+        'on_delivery': delivery_report,
+        'schema.registry.url': schema_registry
+        }, default_key_schema=key_schema, default_value_schema=value_schema)
+
+    avroProducer.produce(topic=topic, value=value, key=key)
+    avroProducer.flush()
+
 #read data file and execute line by line waiting in between. write to kafka
 def execute_log_data(data_log):
     print(' Process player id {} team ({}) started'.format(data_log[0], data_log[1]))
@@ -114,7 +192,7 @@ def execute_log_data(data_log):
     i = 0
     for line in lines[1:]: 
         i += 1
-        if i <= 5:
+        if i <= 50:
             #print(line.strip())
             #40ms -> 40/1000 -> 0.04s
             #the time in the log is cummulated so the last time vales is subtracted each time to get the delta time
@@ -247,13 +325,14 @@ def main():
     with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
         json.dump(dct_data, outfile)
 
+    #create topic if not existent
     kafka_topic = 'test-topic'
-    #create kafka topic if not existent
     #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
-    if not kafka_topic in kafka_topics_get('kafka-1', '9092'):
-        #create kafka topic
-        print('create kafka topic ('+kafka_topic+') as it does not exist.')
-
+    #print(kafka_topics_get('kafka-1', '9092'))
+    if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
+            #create kafka topic(s)
+            print('create kafka topic ('+kafka_topic+') as it does not exist.')
+            kafka_topics_create('kafka-1', '9092', [kafka_topic])
 
     #what to do in a list
     #key: 'work'     
@@ -267,12 +346,11 @@ def main():
 
     # 2 x 11 players and the ball -> 23
     num_processes = int(dct_data[STR_NUMBER_OF_ELEMENTS])
-    print(num_processes)
-    #num_processes = 1
+    #print('num of processes:', num_processes)
 
     with Pool(processes=num_processes) as pool:
-        #pool.map(execute_log_data, work)
-        pass
+        pool.map(execute_log_data, work)
+        #pass
     
     print('{} - Starting to send data in parallel - end'.format(time.perf_counter()))
 
