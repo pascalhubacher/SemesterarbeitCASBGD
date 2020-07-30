@@ -29,8 +29,8 @@ services:
       - zookeeper-1
       - kafka-1
     tty: "true"
-    volumes:
-      - C:/Users/pasca/HV/github/SemesterarbeitCASBGD/simulator/data-transfer:/usr/src/app/data-transfer
+    #volumes:
+    #  - C:/Users/pasca/HV/github/SemesterarbeitCASBGD/simulator/data-transfer:/usr/src/app/data-transfer
  
   #  ================================== Zookeeper ========================================== #}
   zookeeper-1:

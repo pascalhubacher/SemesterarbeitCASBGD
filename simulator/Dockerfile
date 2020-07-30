@@ -30,6 +30,10 @@ COPY ./requirements.txt .
 #copy all the game data to the image
 COPY ./data/ ./data/
 
+#update pip
+RUN pip install --upgrade pip
+
+#install the needed packages
 RUN pip install --no-cache-dir -r requirements.txt
 
 # change directory to the simulator folder 
