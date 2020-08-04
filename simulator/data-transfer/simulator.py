@@ -129,7 +129,7 @@ def kafka_producer(ip, port, message, topic, key = '1'):
 #AVRO Consumer - read messages from kafka (schema registry needed)
 
 #AVRO Producer - write messages to kafka (schema registry needed)
-def kafka_producer_avro(ip, port, value, topic, key='1', schema_registry='http://schema-registry-1:8081'):
+def kafka_producer_avro(ip, port, value, topic, key='1', schema_registry='http://localhost:8081'):
     value_schema_str = """
     {
     "namespace": "my.test",
