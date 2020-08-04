@@ -41,7 +41,7 @@ def kafka_topics_create(ip, port, topic_list):
         'bootstrap.servers': ip+':'+port
     })
 
-    new_topics = [NewTopic(topic, num_partitions=3, replication_factor=1) for topic in topic_list]
+    new_topics = [NewTopic(topic, num_partitions=1, replication_factor=1) for topic in topic_list]
     # Note: In a multi-cluster production scenario, it is more typical to use a replication_factor of 3 for durability.
 
     # Call create_topics to asynchronously create topics. A dict
