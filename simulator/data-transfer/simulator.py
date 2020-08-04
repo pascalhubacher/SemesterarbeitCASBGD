@@ -11,7 +11,7 @@ from confluent_kafka import Producer, Consumer, admin
 from confluent_kafka.admin import AdminClient, NewTopic
 #AVRO
 from confluent_kafka import avro
-from confluent_kafka.avro import SchemaRegistryClient, Schema
+#from confluent_kafka.avro import SchemaRegistryClient, Schema
 #AVRO Producer
 from confluent_kafka.avro import AvroProducer
 #AVRO Consumer
@@ -143,10 +143,10 @@ def schema_registry_register(ip='schema-registry-1', port=8081):
         }
     """
 
-    avro_schema = Schema(schema_str, 'AVRO')
-    sr = SchemaRegistryClient("http://"+ip+":"+port)    
-    _schema_id = client.register_schema("basicavro", avro_schema)
-return(_schema_id)
+    #avro_schema = Schema(schema_str, 'AVRO')
+    #sr = SchemaRegistryClient("http://"+ip+":"+port)    
+    #_schema_id = client.register_schema("basicavro", avro_schema)
+    #return(_schema_id)
 
 
 #AVRO Consumer - read messages from kafka (schema registry needed)

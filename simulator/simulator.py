@@ -11,7 +11,7 @@ from confluent_kafka import Producer, Consumer, admin
 from confluent_kafka.admin import AdminClient, NewTopic
 #AVRO
 from confluent_kafka import avro
-from confluent_kafka.avro import SchemaRegistryClient, Schema
+#from confluent_kafka.avro import SchemaRegistryClient, Schema
 #AVRO Producer
 from confluent_kafka.avro import AvroProducer
 #AVRO Consumer
