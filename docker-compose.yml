@@ -71,7 +71,7 @@ services:
       #if we have more nodes then the replication factior can be risen
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_DELETE_TOPIC_ENABLE: 'True'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'False'
@@ -143,7 +143,7 @@ services:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
 
-    #  ================================== ksqlDB ========================================== #}
+  #  ================================== ksqlDB ========================================== #}
   ksqldb-server-1:
     image: confluentinc/ksqldb-server:0.9.0
     hostname: ksqldb-server-1
