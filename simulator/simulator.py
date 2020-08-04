@@ -11,6 +11,7 @@ from confluent_kafka import Producer, Consumer, admin
 from confluent_kafka.admin import AdminClient, NewTopic
 #AVRO
 from confluent_kafka import avro
+from confluent_kafka.avro import SchemaRegistryClient, Schema
 #AVRO Producer
 from confluent_kafka.avro import AvroProducer
 #AVRO Consumer
@@ -126,6 +127,28 @@ def kafka_producer(ip, port, message, topic, key = '1'):
     # callbacks to be triggered.
     p.flush()
 
+#register schema in schema registry
+def schema_registry_register(ip='schema-registry-1', port=8081):
+    schema_str = """
+        {
+            "type": "record",
+            "name": "data",
+            "fields": [
+                {"name": "timestamp", "type": "int"},
+                {"name": "x",  "type": "double"}
+                {"name": "y",  "type": "double"}
+                {"name": "z",  "type": "double"}
+                {"name": "id",  "type": "string"}
+            ]
+        }
+    """
+
+    #avro_schema = Schema(schema_str, 'AVRO')
+    #sr = SchemaRegistryClient("http://"+ip+":"+port)    
+    #_schema_id = client.register_schema("basicavro", avro_schema)
+    #return(_schema_id)
+
+
 #AVRO Consumer - read messages from kafka (schema registry needed)
 
 #AVRO Producer - write messages to kafka (schema registry needed)
@@ -203,8 +226,16 @@ def execute_log_data(data_log):
 
             #"Timestamp","X"  ,"Y" ,"Z","ID"
             #         40,50.92,1.15,0.0,101
-            #dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID]
-            kafka_producer('kafka-1', '9092', line.strip(), 'test-topic')
+            json_event = {}
+            json_event['timestamp'] = line.strip().split(',')[0]
+            json_event['x'] = line.strip().split(',')[1]
+            json_event['y'] = line.strip().split(',')[2]
+            json_event['z'] = line.strip().split(',')[3]
+            json_event['id'] = line.strip().split(',')[4]
+            #print(line.strip(','), "-:-", json_event)
+
+            #send data to kafka
+            kafka_producer('kafka-1', '9092', json.dumps(json_event), 'test-topic')
 
 
         #do something
