@@ -201,10 +201,17 @@ def execute_log_data(data_log):
             #the last time value
             time_elapsed = int(line.strip().split(',')[0])
 
+            json_event = {}
+            json_event['timestamp'] = line.strip()[0]
+            json_event['x'] = line.strip()[1]
+            json_event['y'] = line.strip()[2]
+            json_event['z'] = line.strip()[3]
+            json_event['id'] = line.strip()[4]
+
             #"Timestamp","X"  ,"Y" ,"Z","ID"
             #         40,50.92,1.15,0.0,101
             #dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID]
-            kafka_producer('kafka-1', '9092', line.strip(), 'test-topic')
+            kafka_producer('kafka-1', '9092', json.dumps(json_event), 'test-topic')
 
 
         #do something

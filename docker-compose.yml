@@ -2,18 +2,24 @@
 # Platform: STREAMTEAM default
 # =====================================================
 
+#ALL
 #docker-compose up --build --remove-orphans
 #docker-compose down
 
 #docker-compose start
 #docker-compose stop
 
+#Kafka
 #docker exec -ti kafka-1 bash
 #root@kafka-1:/# kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --topic test-topic --partitions 1 --replication-factor 1
 
+#Simulator
 #docker exec -it semesterarbeitcasbgd_simulator-1_1 bash
 #root@simulator-1:/usr/src/app# cp ./data-transfer/simulator.py .
 #root@simulator-1:/usr/src/app# python3 simulator.py
+
+#kSQLDB-CLI
+#docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
 
 version: '3'
 # enforce some dependencies
