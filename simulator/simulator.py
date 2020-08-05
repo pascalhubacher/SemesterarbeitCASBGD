@@ -218,7 +218,7 @@ def execute_log_data(param_list):
     i = 0
     for line in lines[1:]: 
         i += 1
-        if i <= 50:
+        if i <= 500:
             #print(line.strip())
             #40ms -> 40/1000 -> 0.04s
             #the time in the log is cummulated so the last time vales is subtracted each time to get the delta time
@@ -352,6 +352,9 @@ def main():
     
     print('{} - Preparing data - start'.format(time.perf_counter()))
     
+    #variables
+    kafka_topic = 'test_topic'
+
     #create json object out of the files
     # '..' -> one folder up
     dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
@@ -360,7 +363,6 @@ def main():
         json.dump(dct_data, outfile)
 
     #create topic if not existent
-    kafka_topic = 'test_topic'
     #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
     #print(kafka_topics_get('kafka-1', '9092'))
     if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
