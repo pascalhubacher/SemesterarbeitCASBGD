@@ -227,7 +227,7 @@ def execute_log_data(data_log):
             #"Timestamp","X"  ,"Y" ,"Z","ID"
             #         40,50.92,1.15,0.0,101
             json_event = {}
-            json_event['timestamp'] = line.strip().split(',')[0]
+            json_event['ts'] = line.strip().split(',')[0]
             json_event['x'] = line.strip().split(',')[1]
             json_event['y'] = line.strip().split(',')[2]
             json_event['z'] = line.strip().split(',')[3]
@@ -235,7 +235,7 @@ def execute_log_data(data_log):
             #print(line.strip(','), "-:-", json_event)
 
             #send data to kafka
-            kafka_producer('kafka-1', '9092', json.dumps(json_event), 'test-topic')
+            kafka_producer('kafka-1', '9092', json.dumps(json_event), 'test_topic')
 
 
         #do something
@@ -357,7 +357,7 @@ def main():
         json.dump(dct_data, outfile)
 
     #create topic if not existent
-    kafka_topic = 'test-topic'
+    kafka_topic = 'test_topic'
     #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
     #print(kafka_topics_get('kafka-1', '9092'))
     if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
