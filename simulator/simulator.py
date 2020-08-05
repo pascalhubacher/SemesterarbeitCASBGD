@@ -134,7 +134,7 @@ def schema_registry_register(ip='schema-registry-1', port=8081):
             "type": "record",
             "name": "data",
             "fields": [
-                {"name": "timestamp", "type": "int"},
+                {"name": "ts", "type": "int"},
                 {"name": "x",  "type": "double"}
                 {"name": "y",  "type": "double"}
                 {"name": "z",  "type": "double"}
@@ -206,9 +206,12 @@ def kafka_producer_avro(ip, port, value, topic, key='1', schema_registry='http:/
     avroProducer.flush()
 
 #read data file and execute line by line waiting in between. write to kafka
-def execute_log_data(data_log):
-    print(' Process player id {} team ({}) started'.format(data_log[0], data_log[1]))
-    with open(data_log[2]) as f:
+def execute_log_data(param_list):
+    #get last element (topic) and remove it from list
+    topic = param_list.pop()
+
+    print(' Process player id {} team ({}) started'.format(param_list[0], param_list[1]))
+    with open(param_list[2]) as f:
         lines = f.readlines()
 
     time_elapsed = 0
@@ -235,12 +238,12 @@ def execute_log_data(data_log):
             #print(line.strip(','), "-:-", json_event)
 
             #send data to kafka
-            kafka_producer('kafka-1', '9092', json.dumps(json_event), 'test_topic')
+            kafka_producer('kafka-1', '9092', json.dumps(json_event), topic)
 
 
         #do something
 
-    print(' Process player id {} team ({}) finished'.format(data_log[0], data_log[1]))
+    print(' Process player id {} team ({}) finished'.format(param_list[0], param_list[1]))
 
 #create json structure out of the data
 def create_data_json(filepath):
@@ -365,11 +368,21 @@ def main():
             print('create kafka topic ('+kafka_topic+') as it does not exist.')
             kafka_topics_create('kafka-1', '9092', [kafka_topic])
 
-    #what to do in a list
-    #key: 'work'     
-    # #[0] ["7", "home", "C:\\Users\\pasca\\HV\\github\\SemesterarbeitCASBGD\\data\\home\\7.csv"]
-    work = dct_data[STR_WORK]
-
+    #list of parameters that are give to each process (tuple of lists)
+    params = [] 
+    # dct_data[STR_WORK] -> tuple of lists. of the structure below
+    # ["7", "home", "C:\\Users\\pasca\\HV\\github\\SemesterarbeitCASBGD\\data\\home\\7.csv"]
+    for elem in dct_data[STR_WORK]:
+        temp = elem
+        #add kafka topic at the end to each list element 
+        temp.append(kafka_topic)
+        
+        #add to parameter list
+        params.append(temp)
+    
+    #convert to tuple
+    params = tuple(params)
+  
     print('{} - Preparing data - end'.format(time.perf_counter()))
 
     start_time = time.perf_counter()
@@ -380,7 +393,7 @@ def main():
     #print('num of processes:', num_processes)
 
     with Pool(processes=num_processes) as pool:
-        pool.map(execute_log_data, work)
+        pool.map(execute_log_data, params)
         #pass
     
     print('{} - Starting to send data in parallel - end'.format(time.perf_counter()))
