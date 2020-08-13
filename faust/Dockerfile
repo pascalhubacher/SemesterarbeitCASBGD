@@ -34,6 +34,10 @@ COPY ./wait_for_services.sh .
 #WORKDIR "/usr/src/app/faust"
 
 ###############################################################################
+
+
+ENTRYPOINT ["./wait_for_services.sh"]
+
 # start the simulator
 #CMD [ "python3", "./faust.py" ]
 
