@@ -30,16 +30,15 @@ RUN pip install --no-cache-dir -r ./requirements.txt
 #copy script to wait for kafka, schema registry
 COPY ./wait_for_services.sh .
 
-# change directory to the simulator folder 
-#WORKDIR "/usr/src/app/faust"
-
 ###############################################################################
-
 
 ENTRYPOINT ["./wait_for_services.sh"]
 
+# start a worker
+# faust -A hello_world worker -l info
+
 # start the simulator
-#CMD [ "python3", "./faust.py" ]
+#CMD [ "python3", "./faust faust.py" ]
 
 #docker build -t pascalhubacher/faust:latest .
 #docker run -it pascalhubacher/faust sh

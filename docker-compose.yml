@@ -21,6 +21,7 @@
 #kSQLDB-CLI
 #docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
 
+#faust
 #docker exec -it semesterarbeitcasbgd_faust-1_1 bash
 
 version: '3'
@@ -41,7 +42,6 @@ services:
       - ./simulator/data-transfer:/usr/src/app/data-transfer
 #  ================================== faust ============================ #}
   faust-1:
-    tty: true
     build:
       context: faust
       dockerfile: Dockerfile
@@ -57,11 +57,12 @@ services:
       - KAFKA_BOOSTRAP_SERVER_NAME=kafka-1
       - KAFKA_BOOSTRAP_SERVER_PORT=9092
       - SCHEMA_REGISTRY_URL=http://schema-registry-1:8081
-      - SCHEMA_REGISTRY_SERVER=schema-registry
+      - SCHEMA_REGISTRY_SERVER=schema-registry-1
       - SCHEMA_REGISTRY_SERVER_PORT=8081
     ports:
       - "8084:80"
       - "8000:8000"
+    tty: true
     volumes:
       - ./faust/data-transfer:/usr/src/app/data-transfer
   #  ================================== Zookeeper ========================================== #}
@@ -132,6 +133,23 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,OPTIONS
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
+#  ================================== Schema Registry UI ========================================== #}
+  schema-registry-ui:
+    image: landoop/schema-registry-ui:latest
+    container_name: schema-registry-ui
+    hostname: schema-registry-ui
+    labels:
+      com.mdps.service.webui.url: http://${PUBLIC_IP}:28102
+    depends_on:
+      - kafka-1
+      - schema-registry-1
+    ports:
+      - 28102:8000
+    environment:
+      SCHEMAREGISTRY_URL: http://${PUBLIC_IP}:8081
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
