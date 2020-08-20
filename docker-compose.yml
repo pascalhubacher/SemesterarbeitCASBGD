@@ -23,6 +23,8 @@
 
 #faust
 #docker exec -it semesterarbeitcasbgd_faust-1_1 bash
+#send value to topic
+#faust -A create_event send @greet '{"ts": "40", "x": "-0.38", "y": "-2.23", "z": "0.0", "id": "10"}'
 
 version: '3'
 # enforce some dependencies
@@ -45,7 +47,6 @@ services:
     build:
       context: faust
       dockerfile: Dockerfile
-    #command: ./run.sh
     depends_on:
       - zookeeper-1
       - kafka-1

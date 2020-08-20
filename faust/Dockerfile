@@ -9,8 +9,9 @@ WORKDIR /usr/src/app
 # download and instll dependencies (to be able to use netcat)
 RUN echo 'deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main' >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get install -y --no-install-recommends apt-utils
-RUN apt-get install -y netcat && apt-get autoremove -y
+    && apt-get install -y --no-install-recommends apt-utils \
+    && apt-get install dos2unix
+RUN apt-get install -y netcat && apt-get autoremove -y && apt-get install dos2unix -y
 
 # clone repository with data
 #RUN git clone https://github.com/pascalhubacher/SemesterarbeitCASBGD.git
@@ -27,18 +28,20 @@ RUN pip install --upgrade pip
 #install the needed packages
 RUN pip install --no-cache-dir -r ./requirements.txt
 
-#copy script to wait for kafka, schema registry
+# copy wait for Kafka and Schema Registry  
 COPY ./wait_for_services.sh .
+# convert the file from windows format to unix format
+RUN dos2unix -ascii wait_for_services.sh
+
+#copy python faust worker script
+COPY ./worker_test.py .
+COPY ./create_event.py .
 
 ###############################################################################
-
 ENTRYPOINT ["./wait_for_services.sh"]
 
-# start a worker
-# faust -A hello_world worker -l info
-
-# start the simulator
-#CMD [ "python3", "./faust faust.py" ]
+# start the a script
+#CMD ["python3", "./worker_test.py"]
 
 #docker build -t pascalhubacher/faust:latest .
-#docker run -it pascalhubacher/faust sh
+#docker run -it pascalhubacher/faust bash

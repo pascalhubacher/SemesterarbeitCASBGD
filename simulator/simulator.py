@@ -148,7 +148,6 @@ def schema_registry_register(ip='schema-registry-1', port=8081):
     #_schema_id = client.register_schema("basicavro", avro_schema)
     #return(_schema_id)
 
-
 #AVRO Consumer - read messages from kafka (schema registry needed)
 
 #AVRO Producer - write messages to kafka (schema registry needed)
@@ -218,7 +217,7 @@ def execute_log_data(param_list):
     i = 0
     for line in lines[1:]: 
         i += 1
-        if i <= 500:
+        if i <= 50:
             #print(line.strip())
             #40ms -> 40/1000 -> 0.04s
             #the time in the log is cummulated so the last time vales is subtracted each time to get the delta time
