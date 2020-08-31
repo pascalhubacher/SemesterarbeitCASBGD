@@ -22,9 +22,12 @@ from confluent_kafka.avro.serializer import SerializerError
 # Globals
 # JSON keys
 STR_PATH = 'path'
-STR_MATCH_ID = 'match_id'
-STR_PITCH_X = 'fPitchXSizeMeters'
-STR_PITCH_Y = 'fPitchYSizeMeters'
+STR_MATCH_ID = 'TracabMetaData.match.iId'
+STR_MATCH_DATE = 'TracabMetaData.match.dtDate'
+STR_MATCH_TIME = 'TracabMetaData.match.dtTime'
+STR_MATCH_FRAMERATE = 'TracabMetaData.match.iFrameRateFps'
+STR_PITCH_X = 'TracabMetaData.match.fPitchXSizeMeters'
+STR_PITCH_Y = 'TracabMetaData.match.fPitchYSizeMeters'
 STR_CONFIG_PROPERTIES = 'config.properties'
 STR_NUMBER_OF_ELEMENTS = 'number_of_elements'
 STR_WORK = 'work'
@@ -148,7 +151,6 @@ def schema_registry_register(ip='schema-registry-1', port=8081):
     #_schema_id = client.register_schema("basicavro", avro_schema)
     #return(_schema_id)
 
-
 #AVRO Consumer - read messages from kafka (schema registry needed)
 
 #AVRO Producer - write messages to kafka (schema registry needed)
@@ -267,10 +269,11 @@ def create_data_json(filepath):
                 dct_data[STR_CONFIG_PROPERTIES] = {}
                 dct_data[STR_CONFIG_PROPERTIES][STR_PATH] = path
                 #properties auslesen
-                #TracabMetaData.match.iId = "19060518"
-                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID] = get_properties(path,'TracabMetaData.match.iId')
-                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_X] = get_properties(path,'TracabMetaData.match.'+STR_PITCH_X)
-                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_Y] = get_properties(path,'TracabMetaData.match.'+STR_PITCH_Y)
+                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID] = get_properties(path,STR_MATCH_ID)
+                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_DATE] = get_properties(path,STR_MATCH_DATE)
+                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_TIME] = get_properties(path,STR_MATCH_TIME)
+                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_X] = get_properties(path,STR_PITCH_X)
+                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_Y] = get_properties(path,STR_PITCH_Y)
 
             elif STR_HOME in path:
                 #not the properties file

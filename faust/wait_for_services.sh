@@ -15,6 +15,11 @@ done
 
 >&2 echo "Schema Registry is up"
 
+#exectue create topic
+echo "Creating topic if not existent"
+python3 create_topic.py
+
 #faust worker script
-echo "Executing faust worker"
-faust -A worker_test worker -l info
+echo "Starting faust worker_1"
+faust -A worker_1 worker -l info
+#faust -A worker_1 worker -l info

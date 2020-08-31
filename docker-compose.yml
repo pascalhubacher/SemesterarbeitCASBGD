@@ -212,6 +212,7 @@ services:
       KSQL_BOOTSTRAP_SERVERS: kafka-1:19092
       KSQL_HOST_NAME: ksqldb-server-1
       KSQL_APPLICATION_ID: kafka-demo
+      #is this 0.0.0.0 correct?
       KSQL_LISTENERS: http://0.0.0.0:8088
       KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
@@ -221,6 +222,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/ksql:/etc/ksql/ext
     restart: unless-stopped
+  #  ================================== ksql cli ========================================== #}
   ksqldb-cli:
     image: confluentinc/ksqldb-cli:0.9.0
     container_name: ksqldb-cli

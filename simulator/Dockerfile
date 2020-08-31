@@ -38,4 +38,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 #CMD ["python3", "./simulator.py"]
 
 #docker build -t pascalhubacher/simulator:latest .
-#docker run -it pascalhubacher/simulator sh
+#docker run -it pascalhubacher/simulator bash

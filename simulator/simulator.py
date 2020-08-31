@@ -1,10 +1,12 @@
 #
 import time
+from datetime import datetime, timedelta
 import math
 import os
 import itertools
 import json
 import re
+import sys
 from multiprocessing import Pool
 from confluent_kafka import Producer, Consumer, admin
 #Admin -> get/create/delete topics
@@ -22,9 +24,12 @@ from confluent_kafka.avro.serializer import SerializerError
 # Globals
 # JSON keys
 STR_PATH = 'path'
-STR_MATCH_ID = 'match_id'
-STR_PITCH_X = 'fPitchXSizeMeters'
-STR_PITCH_Y = 'fPitchYSizeMeters'
+STR_MATCH_ID = 'TracabMetaData.match.iId'
+STR_MATCH_DATE = 'TracabMetaData.match.dtDate'
+STR_MATCH_TIME = 'TracabMetaData.match.dtTime'
+STR_MATCH_FRAMERATE = 'TracabMetaData.match.iFrameRateFps'
+STR_PITCH_X = 'TracabMetaData.match.fPitchXSizeMeters'
+STR_PITCH_Y = 'TracabMetaData.match.fPitchYSizeMeters'
 STR_CONFIG_PROPERTIES = 'config.properties'
 STR_NUMBER_OF_ELEMENTS = 'number_of_elements'
 STR_WORK = 'work'
@@ -206,6 +211,9 @@ def kafka_producer_avro(ip, port, value, topic, key='1', schema_registry='http:/
 
 #read data file and execute line by line waiting in between. write to kafka
 def execute_log_data(param_list):
+    #get last element (dct_data[STR_CONFIG_PROPERTIES]) and remove it from list
+    config_properties = param_list.pop()
+   
     #get last element (topic) and remove it from list
     topic = param_list.pop()
 
@@ -229,7 +237,14 @@ def execute_log_data(param_list):
             #"Timestamp","X"  ,"Y" ,"Z","ID"
             #         40,50.92,1.15,0.0,101
             json_event = {}
-            json_event['ts'] = line.strip().split(',')[0]
+
+            #create timestamp of the format ISO 8601 format (YYYY-MM-DDTHH:MM:SS.mmmmmm)
+            #Example '2018-06-29 08:15:27.243860'
+            date_time_obj = datetime.strptime(config_properties[STR_MATCH_DATE]+' '+config_properties[STR_MATCH_TIME], '%Y-%m-%d %H:%M:%S')
+            date_time_obj += timedelta(seconds=int(line.strip().split(',')[0])/1000)
+            json_event['ts'] = str(date_time_obj.strftime("%Y.%m.%d %H:%M:%S.%f"))
+            #print(json_event['ts'])
+
             json_event['x'] = line.strip().split(',')[1]
             json_event['y'] = line.strip().split(',')[2]
             json_event['z'] = line.strip().split(',')[3]
@@ -237,8 +252,7 @@ def execute_log_data(param_list):
             #print(line.strip(','), "-:-", json_event)
 
             #send data to kafka
-            kafka_producer('kafka-1', '9092', json.dumps(json_event), topic)
-
+            kafka_producer('kafka-1', '9092', json.dumps(json_event), topic, key=config_properties[STR_MATCH_ID])
 
         #do something
 
@@ -266,10 +280,11 @@ def create_data_json(filepath):
                 dct_data[STR_CONFIG_PROPERTIES] = {}
                 dct_data[STR_CONFIG_PROPERTIES][STR_PATH] = path
                 #properties auslesen
-                #TracabMetaData.match.iId = "19060518"
-                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID] = get_properties(path,'TracabMetaData.match.iId')
-                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_X] = get_properties(path,'TracabMetaData.match.'+STR_PITCH_X)
-                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_Y] = get_properties(path,'TracabMetaData.match.'+STR_PITCH_Y)
+                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_ID] = get_properties(path,STR_MATCH_ID)
+                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_DATE] = get_properties(path,STR_MATCH_DATE)
+                dct_data[STR_CONFIG_PROPERTIES][STR_MATCH_TIME] = get_properties(path,STR_MATCH_TIME)
+                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_X] = get_properties(path,STR_PITCH_X)
+                dct_data[STR_CONFIG_PROPERTIES][STR_PITCH_Y] = get_properties(path,STR_PITCH_Y)
 
             elif STR_HOME in path:
                 #not the properties file
@@ -352,7 +367,7 @@ def main():
     print('{} - Preparing data - start'.format(time.perf_counter()))
     
     #variables
-    kafka_topic = 'test_topic'
+    kafka_topic = 'games_raw'
 
     #create json object out of the files
     # '..' -> one folder up
@@ -360,7 +375,7 @@ def main():
     #write to file
     with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
         json.dump(dct_data, outfile)
-
+    
     #create topic if not existent
     #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
     #print(kafka_topics_get('kafka-1', '9092'))
@@ -377,7 +392,10 @@ def main():
         temp = elem
         #add kafka topic at the end to each list element 
         temp.append(kafka_topic)
-        
+
+        #add dct_data to params list
+        temp.append(dct_data[STR_CONFIG_PROPERTIES])
+
         #add to parameter list
         params.append(temp)
     
