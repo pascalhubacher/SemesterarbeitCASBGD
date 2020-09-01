@@ -6,7 +6,7 @@ app = faust.App(
     value_serializer='json',
 )
 
-greetings_topic = app.topic('test_topic')
+greetings_topic = app.topic('games_raw')
 
 @app.agent(greetings_topic)
 async def greet(greetings):

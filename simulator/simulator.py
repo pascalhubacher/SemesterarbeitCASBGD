@@ -240,9 +240,9 @@ def execute_log_data(param_list):
 
             #create timestamp of the format ISO 8601 format (YYYY-MM-DDTHH:MM:SS.mmmmmm)
             #Example '2018-06-29 08:15:27.243860'
-            date_time_obj = datetime.strptime(config_properties[STR_MATCH_DATE]+' '+config_properties[STR_MATCH_TIME], '%Y-%m-%d %H:%M:%S')
+            date_time_obj = datetime.strptime(config_properties[STR_MATCH_DATE]+'T'+config_properties[STR_MATCH_TIME], '%Y-%m-%dT%H:%M:%S')
             date_time_obj += timedelta(seconds=int(line.strip().split(',')[0])/1000)
-            json_event['ts'] = str(date_time_obj.strftime("%Y.%m.%d %H:%M:%S.%f"))
+            json_event['ts'] = str(date_time_obj.strftime("%Y.%m.%dT%H:%M:%S.%f"))
             #print(json_event['ts'])
 
             json_event['x'] = line.strip().split(',')[1]
