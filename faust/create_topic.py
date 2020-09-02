@@ -35,7 +35,7 @@ def kafka_topics_get(ip, port):
 
 #variables
 #'fbPenaltybox', 'fbPitchRight'
-kafka_topics = ['rawGames', 'fbCloseToBall'] 
+kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 
 for kafka_topic in kafka_topics:
     #create topic if not existent

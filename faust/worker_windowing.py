@@ -17,7 +17,7 @@ class GameEvent(faust.Record, serializer='json'):
     z: str
     id: str
 
-app = faust.App('worker_test', broker='kafka://kafka-1:9092', topic_partitions=1, value_serializer='raw')
+app = faust.App('faustFbWindowing', broker='kafka://kafka-1:9092', topic_partitions=1, value_serializer='raw')
 rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 
 @app.agent(rawGameTopic)

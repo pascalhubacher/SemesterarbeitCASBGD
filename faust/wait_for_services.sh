@@ -20,5 +20,6 @@ echo "Creating topic if not existent"
 python3 create_topic.py
 
 #faust worker script
-echo "Starting faust worker_1"
-faust -A worker_1 worker -l info
+echo "Starting faust workerRawGames"
+#faust -A workerRawGames worker -l info
+faust -A worker_windowing worker -l info
