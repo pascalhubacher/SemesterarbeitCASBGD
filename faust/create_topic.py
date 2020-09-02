@@ -34,12 +34,16 @@ def kafka_topics_get(ip, port):
     return(kadmin.list_topics().topics)
 
 #variables
-kafka_topic = 'games_raw'
+#'fbPenaltybox', 'fbPitchRight'
+kafka_topics = ['rawGames'] 
 
-#create topic if not existent
-#{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
-#print(kafka_topics_get('kafka-1', '9092'))
-if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
-    #create kafka topic(s)
-    print('create kafka topic ('+kafka_topic+') as it does not exist.')
-    kafka_topics_create('kafka-1', '9092', [kafka_topic])
+for kafka_topic in kafka_topics:
+    #create topic if not existent
+    #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
+    #print(kafka_topics_get('kafka-1', '9092'))
+    if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
+        #create kafka topic(s)
+        kafka_topics_create('kafka-1', '9092', [kafka_topic])
+        print('kafka topic ('+kafka_topic+') created.')
+    else:
+        print('kafka topic ('+kafka_topic+') already exists.')

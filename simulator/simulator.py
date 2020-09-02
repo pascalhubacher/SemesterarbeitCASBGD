@@ -367,7 +367,7 @@ def main():
     print('{} - Preparing data - start'.format(time.perf_counter()))
     
     #variables
-    kafka_topic = 'games_raw'
+    kafka_topic = 'rawGames'
 
     #create json object out of the files
     # '..' -> one folder up

@@ -18,10 +18,9 @@ class GameEvent(faust.Record, serializer='json'):
     id: str
 
 app = faust.App('worker_test', broker='kafka://kafka-1:9092', topic_partitions=1, value_serializer='raw')
-game_event_topic = app.topic('test_topic', value_type=GameEvent)
-#out_topic =  = app.topic('test_topic1', value_type=GameEvent)
+rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 
-@app.agent(game_event_topic)
+@app.agent(rawGameTopic)
 async def process(stream):
     async for values in stream.take(75, within=3):
         print(f'RECEIVED {len(values)}: {values}')

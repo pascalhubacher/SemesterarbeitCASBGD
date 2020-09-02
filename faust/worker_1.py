@@ -17,20 +17,24 @@ class GameEvent(faust.Record, serializer='json'):
     z: str
     id: str
 
-app = faust.App('worker_test', broker='kafka://kafka-1:9092', topic_partitions=1, value_serializer='raw')
+app = faust.App('faustFb', broker='kafka://kafka-1:9092', topic_partitions=1, value_serializer='raw')
 
-game_event_topic = app.topic('games_raw', value_type=GameEvent)
+rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 
-game_close_to_ball = app.topic('football_close_to_ball', value_type=GameEvent)
-
-#game_counter = app.Table('event_count', default=int)
+fbCloseToBallTopic = app.topic('fbCloseToBall', value_type=GameEvent)
 
 event_counter = app.Table('event_count', default=int)
 
-@app.agent(game_event_topic)
-async def process(games_raw: faust.Stream[GameEvent]) -> None:
-    async for game_event in games_raw:
-        print(game_event)
+@app.agent(rawGameTopic)
+async def process(rawGamesEvents: faust.Stream[GameEvent]):
+    async for gameEvent in rawGamesEvents:
+        print(gameEvent)
+        gameEvent.forward(fbCloseToBallTopic)
+
+#@app.agent(game_event_topic)
+#async def process(games_raw: faust.Stream[GameEvent]) -> None:
+#    async for game_event in games_raw:
+#        print(game_event)
 
 #if __name__ == '__main__':
 #    app.main()

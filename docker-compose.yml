@@ -39,6 +39,7 @@ services:
     depends_on:
       - zookeeper-1
       - kafka-1
+      - schema-registry-1
     tty: true
     volumes:
       - ./simulator/data-transfer:/usr/src/app/data-transfer

@@ -41,7 +41,7 @@ COPY ./worker_1.py .
 
 #to create an event manually with faust (testing)
 #faust -A create_event send @greet '{"ts": "40", "x": "-0.38", "y": "-2.23", "z": "0.0", "id": "10"}'
-COPY ./create_event.py .
+COPY ./worker_windowing.py .
 
 ###############################################################################
 ENTRYPOINT ["./wait_for_services.sh"]
