@@ -21,4 +21,4 @@ python3 create_topic.py
 
 #faust worker script
 echo "Starting faust worker_1"
-#faust -A worker_1 worker -l info
+faust -A worker_1 worker -l info

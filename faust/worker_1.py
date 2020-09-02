@@ -27,14 +27,12 @@ event_counter = app.Table('event_count', default=int)
 
 @app.agent(rawGameTopic)
 async def process(rawGamesEvents: faust.Stream[GameEvent]):
-    async for gameEvent in rawGamesEvents:
+    async for key, gameEvent in rawGamesEvents.items():
+        print(key)
         print(gameEvent)
-        gameEvent.forward(fbCloseToBallTopic)
 
-#@app.agent(game_event_topic)
-#async def process(games_raw: faust.Stream[GameEvent]) -> None:
-#    async for game_event in games_raw:
-#        print(game_event)
+        #send event to topic
+        await fbCloseToBallTopic.send(key=key, value=gameEvent)
 
 #if __name__ == '__main__':
 #    app.main()
