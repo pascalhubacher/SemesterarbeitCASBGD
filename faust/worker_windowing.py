@@ -6,7 +6,7 @@ windows_size = 3
 events_per_second = 25
 number_of_players_plus_ball = 23
 max_events = windows_size * events_per_second * number_of_players_plus_ball
-print('windows_size', windows_siz)
+print('windows_size', windows_size)
 print('max_events', max_events)
 
 #json data in the stream

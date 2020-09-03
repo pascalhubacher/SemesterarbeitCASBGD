@@ -19,6 +19,6 @@ done
 sleep 60
 
 #faust worker script
->&2 echo "Starting faust workerRawGames"
+>&2 echo "Starting faust worker listening on RawGames"
 #faust -A workerRawGames worker -l info
 faust -A worker_windowing worker -l info
