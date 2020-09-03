@@ -46,7 +46,7 @@ async def process(stream):
 
         
         for element in values:
-            if ballPossession(element.id, BALL_ID) and elemet.id != BALL_ID:
+            if ballPossession(element.id, BALL_ID) and element.id != BALL_ID:
                 #send event to topic
                 await fbCloseToBallTopic.send(key='1111', value=element)
 
