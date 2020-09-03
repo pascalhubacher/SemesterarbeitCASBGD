@@ -1,7 +1,7 @@
 import faust
 from datetime import timedelta
 
-def whatIdHasTheBall(metadataTopic):
+def whatsTheBallId(metadataTopic):
     return('200')
 
 def ballPossession(playerId, ballId, distance=2):
