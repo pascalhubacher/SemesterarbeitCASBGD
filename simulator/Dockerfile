@@ -5,9 +5,6 @@ FROM python:3
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-# update python 3
-#RUN apk add --update python3
-
 ###############################################################################
 # download and install dependencies
 
@@ -15,11 +12,26 @@ WORKDIR /usr/src/app
 # install git
 #RUN apk add --update git
 
+# download and instll dependencies (to be able to use netcat)
+RUN echo 'deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main' >> /etc/apt/sources.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends apt-utils \
+    && apt-get install dos2unix
+RUN apt-get install -y netcat && apt-get autoremove -y && apt-get install dos2unix -y
+
 # clone repository with data
 #RUN git clone https://github.com/pascalhubacher/SemesterarbeitCASBGD.git
 
+# copy wait for Kafka and Schema Registry  
+COPY ./wait_for_services.sh .
+# convert the file from windows format to unix format
+RUN dos2unix -ascii wait_for_services.sh
+
 # copy the simulator.py application
 COPY ./simulator.py .
+
+#copy the python script to create the topics if not existent 
+COPY ./initialize_env.py .
 
 # copy the list of all packages to be installed
 COPY ./requirements.txt .
@@ -34,8 +46,8 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 ###############################################################################
-# start the simulator
-#CMD ["python3", "./simulator.py"]
+#set up the environment
+CMD ["./wait_for_services.sh"]
 
 #docker build -t pascalhubacher/simulator:latest .
 #docker run -it pascalhubacher/simulator bash

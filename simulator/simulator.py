@@ -371,22 +371,23 @@ def main():
   
     #create json object out of the files
     # '..' -> one folder up
-    dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
+    #dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
     #write to file
-    with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
-        json.dump(dct_data, outfile)
+    #with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
+    #    json.dump(dct_data, outfile)
 
-    #create metadata of match
-
+    # Open game JSON file
+    with open(os.path.join(os.getcwd(), 'game.json')) as json_file: 
+        dct_data = json.load(json_file) 
 
     #create topics if not existent
-    for kafka_topic in kafka_topics:
-        #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
-        #print(kafka_topics_get('kafka-1', '9092'))
-        if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
-                #create kafka topic(s)
-                print('create kafka topic ('+kafka_topic+') as it does not exist.')
-                kafka_topics_create('kafka-1', '9092', [kafka_topic])
+    #for kafka_topic in kafka_topics:
+    #    #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
+    #    #print(kafka_topics_get('kafka-1', '9092'))
+    #    if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
+    #            #create kafka topic(s)
+    #            print('create kafka topic ('+kafka_topic+') as it does not exist.')
+    #            kafka_topics_create('kafka-1', '9092', [kafka_topic])
 
     #list of parameters that are give to each process (tuple of lists)
     params = [] 

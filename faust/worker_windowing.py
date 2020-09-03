@@ -1,4 +1,13 @@
 import faust
+import time
+
+#variables
+windows_size = 3
+events_per_second = 25
+number_of_players_plus_ball = 23
+max_events = windows_size * events_per_second * number_of_players_plus_ball
+print('windows_size', windows_siz)
+print('max_events', max_events)
 
 #json data in the stream
 #{
@@ -22,8 +31,8 @@ rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 
 @app.agent(rawGameTopic)
 async def process(stream):
-    async for values in stream.take(75, within=3):
-        print(f'RECEIVED {len(values)}: {values}')
+    async for values in stream.take(max_events, within=windows_size):
+        print(f'RECEIVED {len(values)}: {values[0].GameEvent.ts}')
 
 #if __name__ == '__main__':
 #    app.main()

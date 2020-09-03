@@ -35,7 +35,7 @@ RUN dos2unix -ascii wait_for_services.sh
 
 #copy python faust worker script
 #create the topic if needed for the faust listener because if it does not exist the faust listener stops 
-COPY ./create_topic.py .
+#COPY ./initialize_env.py .
 #faust listener
 COPY ./workerRawGames.py .
 
@@ -45,7 +45,7 @@ COPY ./create_event.py .
 COPY ./worker_windowing.py .
 
 ###############################################################################
-ENTRYPOINT ["./wait_for_services.sh"]
+CMD ["./wait_for_services.sh"]
 
 # start the a script
 #CMD ["python3", "./worker_test.py"]

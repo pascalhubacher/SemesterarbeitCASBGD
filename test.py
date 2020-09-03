@@ -25,3 +25,17 @@ print(dist)
 #print(date_time_obj + date_time_obj2)
 
 #date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S.%f')
+
+import socket
+
+#returns TRUE if the port is listening, False if not
+def portscan(hostname, port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
+    conn = s.connect_ex((hostname, port))
+    if(conn == 0) :
+        return(True)
+    else:
+        return(False)
+    s.close()
+
+print(portscan('localhost', 1026))
