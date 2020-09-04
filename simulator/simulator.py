@@ -249,6 +249,7 @@ def execute_log_data(param_list):
             json_event['y'] = line.strip().split(',')[2]
             json_event['z'] = line.strip().split(',')[3]
             json_event['id'] = line.strip().split(',')[4]
+            json_event['matchid'] = config_properties[STR_MATCH_ID]
             #print(line.strip(','), "-:-", json_event)
 
             #send data to kafka
