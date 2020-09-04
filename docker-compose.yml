@@ -23,8 +23,10 @@
 
 #faust
 #docker exec -it semesterarbeitcasbgd_faust-1_1 bash
+#start faust worker
+#faust -A worker_windowing worker -l info
 #send value to topic
-#faust -A create_event send @greet -key='19060518' '{"ts": "2018-06-29T08:15:27.243860", "x": "-0.38", "y": "-2.23", "z": "0.0", "id": "10"}'
+#faust -A create_event send @greet -k '19060518.10' '{"ts": "2018-06-29T08:15:27.243860", "x": "-0.38", "y": "-2.23", "z": "0.0", "id": "10", "matchid": "19060518"}'
 
 version: '3'
 # enforce some dependencies
