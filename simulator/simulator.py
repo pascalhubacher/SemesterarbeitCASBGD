@@ -252,7 +252,7 @@ def execute_log_data(param_list):
             #print(line.strip(','), "-:-", json_event)
 
             #send data to kafka
-            kafka_producer('kafka-1', '9092', json.dumps(json_event), topic, key=config_properties[STR_MATCH_ID])
+            kafka_producer('kafka-1', '9092', json.dumps(json_event), topic, key=config_properties[STR_MATCH_ID]+'.'+line.strip().split(',')[4])
 
         #do something
 

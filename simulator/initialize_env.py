@@ -186,4 +186,3 @@ for kafka_topic in kafka_topics:
         print('kafka topic ('+kafka_topic+') already exists.')
 
 #fill in the match evetn into the rawMetaMatch topic
-
