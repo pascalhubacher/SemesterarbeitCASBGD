@@ -3,7 +3,7 @@
 -- docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
 
 -- Script ausführen; Script muss in das Verzeichnis /data-transfer kopiert werden, damit es im Docker-Container in ksql verfügbar ist
--- RUN SCRIPT '/data-transfer/ksql.sql'
+-- RUN SCRIPT '/data-transfer/initKafkaTopics.sql'
 
 
 -- Sollten beim ausführen des Scripts Fehler auftreten beim löschen der Tagellen und Topics (drop table) weil noch Queries am laufen sind, ist wie folgt vorzugehen
