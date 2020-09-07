@@ -58,7 +58,8 @@ rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 fbCloseToBallTopic = app.topic('fbBallPossession', value_type=GameEvent)
 
 from datetime import timedelta
-windowedTable = app.Table('windowedTable', default=str).tumbling(1, expires=timedelta(seconds=1), key_index=True)
+windowedTable = app.Table('windowedTable', default=GameEvent)
+#windowedTable = app.Table('windowedTable', default=str).tumbling(windows_size, expires=timedelta(seconds=windows_size), key_index=True)
 #windowedTable = app.Table('windowedTable', value_type=GameEvent).tumbling(1, expires=timedelta(seconds=1), key_index=True)
 
 @app.agent(rawGameTopic)
@@ -67,25 +68,40 @@ async def process(stream):
         #print(key, value)
         windowedTable[key] = value
 
-        print('--START--')
+        #print('--START--')
         #print(str(bytes(BALL_KEY, 'utf-8'))+' - '+str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))
 
         # Show keys present relative to time of current event in stream:
         #print(len(list(windowedTable.keys())), list(windowedTable.keys()))
         
-        #if the ball value is in the table
-        value = str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())
-        if not value == '':
-            print('BALL - '+str(bytes(BALL_KEY, 'utf-8'))+' - '+str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))
-            #print('BALL - '+str(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))))
+        #print(windowedTable.keys())
+        #print(windowedTable.values())
 
-            for key_elem in list(windowedTable.keys()):
-                #do not take the ball data
-                if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (windowedTable[key_elem].value() == ''):
-                    print(str(key_elem)+' - '+str(windowedTable[key_elem].value())+' - '+str(euclidianDistance(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())),getxyzvalues(str(windowedTable[key_elem].value())))))
-                    #print(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())))
-                    #print(getxyzvalues(str(windowedTable[key_elem].value())))
-                    
+        if key == bytes(BALL_KEY, 'utf-8'):
+            ball = windowedTable[bytes(BALL_KEY, 'utf-8')]
+            for key_elem, value_elem in zip(windowedTable.keys(), windowedTable.values()):
+                if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (str(value_elem) == ''):
+                    euclidian_distance = euclidianDistance((ball.x, ball.y, ball.z),(value_elem.x, value_elem.y, value_elem.z))
+                    if euclidian_distance < 3:
+                        #print(key_elem, value_elem, euclidian_distance)
+                        await fbCloseToBallTopic.send(key=key_elem, value=value_elem)
+
+
+        ##if the ball value is in the table
+        #value = str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())
+        #if not value == '':
+        #    print('BALL - '+str(bytes(BALL_KEY, 'utf-8'))+' - '+str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))
+        #    #print('BALL - '+str(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))))
+
+        #    for key_elem in list(windowedTable.keys()):
+        #        #do not take the ball data
+        #        if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (windowedTable[key_elem].value() == ''):
+        #            euclidian_distance = euclidianDistance(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())),getxyzvalues(str(windowedTable[key_elem].value())))
+        #            print(str(key_elem)+' - '+str(windowedTable[key_elem].value())+' - '+str(euclidian_distance))
+        #            #print(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())))
+        #            #print(getxyzvalues(str(windowedTable[key_elem].value())))
+        #            if euclidian_distance < 3:
+        #                await fbCloseToBallTopic.send(key=key_elem, value=windowedTable[key_elem].value())
 
         #print('----')
         # Show items present relative to time of current event in stream:
@@ -95,7 +111,7 @@ async def process(stream):
         # Show values present relative to time of current event in stream:
         #print(list(windowedTable.values()))
 
-        print('--END--')
+        #print('--END--')
 #    async for values in stream.take(max_events, within=windows_size):
 #        print(f'RECEIVED {len(values)} with key xy')
 

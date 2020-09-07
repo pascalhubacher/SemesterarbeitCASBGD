@@ -1,10 +1,12 @@
 #
 import time
+from datetime import datetime, timedelta
 import math
 import os
 import itertools
 import json
 import re
+import sys
 from multiprocessing import Pool
 from confluent_kafka import Producer, Consumer, admin
 #Admin -> get/create/delete topics
@@ -209,6 +211,9 @@ def kafka_producer_avro(ip, port, value, topic, key='1', schema_registry='http:/
 
 #read data file and execute line by line waiting in between. write to kafka
 def execute_log_data(param_list):
+    #get last element (dct_data[STR_CONFIG_PROPERTIES]) and remove it from list
+    config_properties = param_list.pop()
+   
     #get last element (topic) and remove it from list
     topic = param_list.pop()
 
@@ -232,16 +237,23 @@ def execute_log_data(param_list):
             #"Timestamp","X"  ,"Y" ,"Z","ID"
             #         40,50.92,1.15,0.0,101
             json_event = {}
-            json_event['ts'] = line.strip().split(',')[0]
+
+            #create timestamp of the format ISO 8601 format (YYYY-MM-DDTHH:MM:SS.mmmmmm)
+            #Example '2018-06-29 08:15:27.243860'
+            date_time_obj = datetime.strptime(config_properties[STR_MATCH_DATE]+'T'+config_properties[STR_MATCH_TIME], '%Y-%m-%dT%H:%M:%S')
+            date_time_obj += timedelta(seconds=int(line.strip().split(',')[0])/1000)
+            json_event['ts'] = str(date_time_obj.strftime("%Y.%m.%dT%H:%M:%S.%f"))
+            #print(json_event['ts'])
+
             json_event['x'] = line.strip().split(',')[1]
             json_event['y'] = line.strip().split(',')[2]
             json_event['z'] = line.strip().split(',')[3]
             json_event['id'] = line.strip().split(',')[4]
+            json_event['matchid'] = config_properties[STR_MATCH_ID]
             #print(line.strip(','), "-:-", json_event)
 
             #send data to kafka
-            kafka_producer('kafka-1', '9092', json.dumps(json_event), topic)
-
+            kafka_producer('kafka-1', '9092', json.dumps(json_event), topic, key=config_properties[STR_MATCH_ID]+'.'+line.strip().split(',')[4])
 
         #do something
 
@@ -356,22 +368,27 @@ def main():
     print('{} - Preparing data - start'.format(time.perf_counter()))
     
     #variables
-    kafka_topic = 'test_topic'
-
+    kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
+  
     #create json object out of the files
     # '..' -> one folder up
-    dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
+    #dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
     #write to file
-    with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
-        json.dump(dct_data, outfile)
+    #with open(os.path.join(os.getcwd(), 'game.json'), 'w') as outfile:
+    #    json.dump(dct_data, outfile)
 
-    #create topic if not existent
-    #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
-    #print(kafka_topics_get('kafka-1', '9092'))
-    if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
-            #create kafka topic(s)
-            print('create kafka topic ('+kafka_topic+') as it does not exist.')
-            kafka_topics_create('kafka-1', '9092', [kafka_topic])
+    # Open game JSON file
+    with open(os.path.join(os.getcwd(), 'game.json')) as json_file: 
+        dct_data = json.load(json_file) 
+
+    #create topics if not existent
+    #for kafka_topic in kafka_topics:
+    #    #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
+    #    #print(kafka_topics_get('kafka-1', '9092'))
+    #    if len([elem for elem in kafka_topics_get('kafka-1', '9092') if elem == kafka_topic]) == 0:
+    #            #create kafka topic(s)
+    #            print('create kafka topic ('+kafka_topic+') as it does not exist.')
+    #            kafka_topics_create('kafka-1', '9092', [kafka_topic])
 
     #list of parameters that are give to each process (tuple of lists)
     params = [] 
@@ -380,8 +397,11 @@ def main():
     for elem in dct_data[STR_WORK]:
         temp = elem
         #add kafka topic at the end to each list element 
-        temp.append(kafka_topic)
-        
+        temp.append(kafka_topics[0])
+
+        #add dct_data to params list
+        temp.append(dct_data[STR_CONFIG_PROPERTIES])
+
         #add to parameter list
         params.append(temp)
     

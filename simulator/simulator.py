@@ -225,7 +225,7 @@ def execute_log_data(param_list):
     i = 0
     for line in lines[1:]: 
         i += 1
-        if i <= 50:
+        if i <= 5000:
             #print(line.strip())
             #40ms -> 40/1000 -> 0.04s
             #the time in the log is cummulated so the last time vales is subtracted each time to get the delta time
