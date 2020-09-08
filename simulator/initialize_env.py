@@ -24,19 +24,23 @@ STR_BALL = 'ball'
 STR_OTHER = 'other'
 
 #create kafka topics
-def kafka_topics_create(ip, port, topic_list):
+def kafka_topics_create(broker_list, topic_list):
+    kafka_servers_str = ''
+    for kafka_srv_elem in broker_list:
+        kafka_servers_str += ', ' + kafka_srv_elem
+    
     a = AdminClient({
-        'bootstrap.servers': ip+':'+port
+        'bootstrap.servers': kafka_servers_str
     })
-
-    new_topics = [NewTopic(topic, num_partitions=1, replication_factor=1) for topic in topic_list]
+    
+    new_topics = [NewTopic(topic, num_partitions=30, replication_factor=3) for topic in topic_list]
     # Note: In a multi-cluster production scenario, it is more typical to use a replication_factor of 3 for durability.
 
     # Call create_topics to asynchronously create topics. A dict
     # of <topic,future> is returned.
     fs = a.create_topics(new_topics)
 
-    # Wait for each operation to finish.
+    # Wait for each operation to finish.<
     for topic, f in fs.items():
         try:
             f.result()  # The result itself is None
@@ -45,9 +49,13 @@ def kafka_topics_create(ip, port, topic_list):
             print("Failed to create topic {}: {}".format(topic, e))
 
 #list kafka topics
-def kafka_topics_get(ip, port):
+def kafka_topics_get(broker_list):
+    kafka_servers_str = ''
+    for kafka_srv_elem in broker_list:
+        kafka_servers_str += ', ' + kafka_srv_elem
+
     kadmin = AdminClient({
-        'bootstrap.servers': ip+':'+port
+        'bootstrap.servers': kafka_servers_str
     })
 
     #Returns a dict(). See example below.
@@ -160,8 +168,7 @@ def get_player_id(str_filepath, str_suffix='.csv'):
 #variables
 #'fbPenaltybox', 'fbPitchRight'
 kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
-kafka_broker_name = 'kafka-1'
-kafka_broker_port = '9092'
+kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
 
 #create json object out of the files
 # '..' -> one folder up
@@ -178,9 +185,9 @@ for kafka_topic in kafka_topics:
     #create topic if not existent
     #{'__consumer_offsets': TopicMetadata(__consumer_offsets, 50 partitions), '__confluent.support.metrics': TopicMetadata(__confluent.support.metrics, 1 partitions), 'test-topic': TopicMetadata(test-topic, 1 partitions)}
     #print(kafka_topics_get('kafka-1', '9092'))
-    if len([elem for elem in kafka_topics_get(kafka_broker_name, kafka_broker_port) if elem == kafka_topic]) == 0:
+    if len([elem for elem in kafka_topics_get(kafka_brokers) if elem == kafka_topic]) == 0:
         #create kafka topic(s)
-        kafka_topics_create(kafka_broker_name, kafka_broker_port, [kafka_topic])
+        kafka_topics_create(kafka_brokers, [kafka_topic])
         print('kafka topic ('+kafka_topic+') created.')
     else:
         print('kafka topic ('+kafka_topic+') already exists.')

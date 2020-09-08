@@ -42,12 +42,15 @@ STR_OTHER = 'other'
 INT_TIME_LAPS = 1
 
 #create kafka topics
-def kafka_topics_create(ip, port, topic_list):
+def kafka_topics_create(broker_list, topic_list):
+    for kafka_srv_elem in broker_list:
+        kafka_servers_str += ', ' + kafka_srv_elem
+    
     a = AdminClient({
-        'bootstrap.servers': ip+':'+port
+        'bootstrap.servers': kafka_servers_str
     })
 
-    new_topics = [NewTopic(topic, num_partitions=1, replication_factor=1) for topic in topic_list]
+    new_topics = [NewTopic(topic, num_partitions=30, replication_factor=3) for topic in topic_list]
     # Note: In a multi-cluster production scenario, it is more typical to use a replication_factor of 3 for durability.
 
     # Call create_topics to asynchronously create topics. A dict
@@ -63,9 +66,13 @@ def kafka_topics_create(ip, port, topic_list):
             print("Failed to create topic {}: {}".format(topic, e))
     
 #list kafka topics
-def kafka_topics_get(ip, port):
+def kafka_topics_get(broker_list):
+    kafka_servers_str = ''
+    for kafka_srv_elem in broker_list:
+        kafka_servers_str += ', ' + kafka_srv_elem
+        
     kadmin = AdminClient({
-        'bootstrap.servers': ip+':'+port
+        'bootstrap.servers': kafka_servers_str
     })
 
     #Returns a dict(). See example below.
@@ -73,9 +80,13 @@ def kafka_topics_get(ip, port):
     return(kadmin.list_topics().topics)
     
 #Consumer - read messages from kafka
-def kafka_consumer(ip, port, message, topic, group_id = 'mygroup'):
+def kafka_consumer(broker_list, message, topic, group_id = 'mygroup'):
+    kafka_servers_str = ''
+    for kafka_srv_elem in broker_list:
+        kafka_servers_str += ', ' + kafka_srv_elem
+
     c = Consumer({
-        'bootstrap.servers': ip+':'+port,
+        'bootstrap.servers': kafka_servers_str,
         'group.id': group_id,
         'auto.offset.reset': 'earliest'
     })
@@ -96,12 +107,16 @@ def kafka_consumer(ip, port, message, topic, group_id = 'mygroup'):
     c.close()
 
 #Producer - write messages to kafka
-def kafka_producer(ip, port, message, topic, key = '1'):
+def kafka_producer(broker_list, message, topic, key = '1'):
     #############################
     # confluent kafka Producer
     #############################
 
-    p = Producer({'bootstrap.servers': ip+':'+port})
+    kafka_servers_str = ''
+    for kafka_srv_elem in broker_list:
+        kafka_servers_str += ', ' + kafka_srv_elem
+
+    p = Producer({'bootstrap.servers': kafka_servers_str})
 
     def delivery_report(err, msg):
         """ Called once for each message produced to indicate delivery result.
@@ -212,6 +227,9 @@ def kafka_producer_avro(ip, port, value, topic, key='1', schema_registry='http:/
 #read data file and execute line by line waiting in between. write to kafka
 def execute_log_data(param_list):
     #get last element (dct_data[STR_CONFIG_PROPERTIES]) and remove it from list
+    kafka_broker_list = param_list.pop()
+    
+    #get last element (dct_data[STR_CONFIG_PROPERTIES]) and remove it from list
     config_properties = param_list.pop()
    
     #get last element (topic) and remove it from list
@@ -225,7 +243,7 @@ def execute_log_data(param_list):
     i = 0
     for line in lines[1:]: 
         i += 1
-        if i <= 5000:
+        if i <= 700:
             #print(line.strip())
             #40ms -> 40/1000 -> 0.04s
             #the time in the log is cummulated so the last time vales is subtracted each time to get the delta time
@@ -244,7 +262,7 @@ def execute_log_data(param_list):
             date_time_obj += timedelta(seconds=int(line.strip().split(',')[0])/1000)
             json_event['ts'] = str(date_time_obj.strftime("%Y.%m.%dT%H:%M:%S.%f"))
             #print(json_event['ts'])
-
+            
             json_event['x'] = line.strip().split(',')[1]
             json_event['y'] = line.strip().split(',')[2]
             json_event['z'] = line.strip().split(',')[3]
@@ -253,7 +271,7 @@ def execute_log_data(param_list):
             #print(line.strip(','), "-:-", json_event)
 
             #send data to kafka
-            kafka_producer('kafka-1', '9092', json.dumps(json_event), topic, key=config_properties[STR_MATCH_ID]+'.'+line.strip().split(',')[4])
+            kafka_producer(kafka_broker_list, json.dumps(json_event), topic, key=str(json_event['matchid'])+'.'+str(json_event['id']))
 
         #do something
 
@@ -392,8 +410,15 @@ def main():
 
     #list of parameters that are give to each process (tuple of lists)
     params = [] 
+
+    #list of all kafka brokers
+    kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
+    #kafka_brokers = ['kafka-1:9092']
+    #position = 0
+
     # dct_data[STR_WORK] -> tuple of lists. of the structure below
     # ["7", "home", "C:\\Users\\pasca\\HV\\github\\SemesterarbeitCASBGD\\data\\home\\7.csv"]
+
     for elem in dct_data[STR_WORK]:
         temp = elem
         #add kafka topic at the end to each list element 
@@ -402,8 +427,12 @@ def main():
         #add dct_data to params list
         temp.append(dct_data[STR_CONFIG_PROPERTIES])
 
+        #define kafka broker list
+        temp.append(kafka_brokers)
+        
         #add to parameter list
         params.append(temp)
+
     
     #convert to tuple
     params = tuple(params)

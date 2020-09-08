@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\pasca\\Anaconda3\\python.exe"
+    "python.pythonPath": "C:\\Users\\pasca\\Anaconda3\\python.exe",
+    "terminal.integrated.scrollback": 1000000
 }
