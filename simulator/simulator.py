@@ -41,6 +41,11 @@ STR_OTHER = 'other'
 #time laps
 INT_TIME_LAPS = 1
 
+#list of all kafka brokers
+#kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
+kafka_brokers = ['kafka-1:9092']
+kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
+
 #create kafka topics
 def kafka_topics_create(broker_list, topic_list):
     for kafka_srv_elem in broker_list:
@@ -50,7 +55,8 @@ def kafka_topics_create(broker_list, topic_list):
         'bootstrap.servers': kafka_servers_str
     })
 
-    new_topics = [NewTopic(topic, num_partitions=30, replication_factor=3) for topic in topic_list]
+    #new_topics = [NewTopic(topic, num_partitions=30, replication_factor=3) for topic in topic_list]
+    new_topics = [NewTopic(topic, num_partitions=int(len(broker_list)), replication_factor=int(len(broker_list))) for topic in topic_list]
     # Note: In a multi-cluster production scenario, it is more typical to use a replication_factor of 3 for durability.
 
     # Call create_topics to asynchronously create topics. A dict
@@ -106,6 +112,7 @@ def kafka_consumer(broker_list, message, topic, group_id = 'mygroup'):
 
     c.close()
 
+# not used as the producer have to be created only once per data file and not for each message -> errors
 #Producer - write messages to kafka
 def kafka_producer(broker_list, message, topic, key = '1'):
     #############################
@@ -127,21 +134,18 @@ def kafka_producer(broker_list, message, topic, key = '1'):
             #print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
             pass
 
-    # Trigger any available delivery report callbacks from previous produce() calls
-    p.poll(0)
-
     # Asynchronously produce a message, the delivery report callback
     # will be triggered from poll() above, or flush() below, when the message has
     # been successfully delivered or failed permanently.
     
+    # Trigger any available delivery report callbacks from previous produce() calls
+    p.poll(0)
+
     # No Key
     #p.produce(topic, data.encode('utf-8'), callback=delivery_report)
     
-    # Key = '1'
-    p.produce(str(topic)
-            , key=str(key)
-            , value = message.encode('utf-8')
-            , callback=delivery_report)
+    # with key
+    p.produce(str(topic), key=str(key), value = message.encode('utf-8'), callback=delivery_report)
 
     # Wait for any outstanding messages to be delivered and delivery report
     # callbacks to be triggered.
@@ -224,7 +228,7 @@ def kafka_producer_avro(ip, port, value, topic, key='1', schema_registry='http:/
     avroProducer.produce(topic=topic, value=value, key=key)
     avroProducer.flush()
 
-#read data file and execute line by line waiting in between. write to kafka
+#read data file and execute line by line waiting in between and write to kafka
 def execute_log_data(param_list):
     #get last element (dct_data[STR_CONFIG_PROPERTIES]) and remove it from list
     kafka_broker_list = param_list.pop()
@@ -234,6 +238,33 @@ def execute_log_data(param_list):
    
     #get last element (topic) and remove it from list
     topic = param_list.pop()
+
+    #prepare kafka producer
+    kafka_servers_str = ''
+    for kafka_srv_elem in kafka_broker_list:
+        kafka_servers_str += ', ' + kafka_srv_elem
+    #print(kafka_servers_str)
+
+    p = Producer({'bootstrap.servers': kafka_servers_str})
+
+    def delivery_report(err, msg):
+        """ Called once for each message produced to indicate delivery result.
+            Triggered by poll() or flush(). """
+        if err is not None:
+            print('Message delivery failed: {}'.format(err))
+        else:
+            #print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+            pass
+    #
+
+    def delivery_report(err, msg):
+        """ Called once for each message produced to indicate delivery result.
+            Triggered by poll() or flush(). """
+        if err is not None:
+            print('Message delivery failed: {}'.format(err))
+        else:
+            #print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+            pass
 
     print(' Process player id {} team ({}) started'.format(param_list[0], param_list[1]))
     with open(param_list[2]) as f:
@@ -271,11 +302,20 @@ def execute_log_data(param_list):
             #print(line.strip(','), "-:-", json_event)
 
             #send data to kafka
-            kafka_producer(kafka_broker_list, json.dumps(json_event), topic, key=str(json_event['matchid'])+'.'+str(json_event['id']))
+            #kafka_producer(kafka_broker_list, json.dumps(json_event), topic, key=str(json_event['matchid'])+'.'+str(json_event['id']))
+            
+            # Trigger any available delivery report callbacks from previous produce() calls
+            p.poll(0)
+            # with key
+            p.produce(str(topic), key=str(json_event['matchid'])+'.'+str(json_event['id']), value = json.dumps(json_event).encode('utf-8'), callback=delivery_report)
 
         #do something
 
-    print(' Process player id {} team ({}) finished'.format(param_list[0], param_list[1]))
+    # Wait for any outstanding messages to be delivered and delivery report
+    # callbacks to be triggered.
+    p.flush()
+
+    print(' Process player id {} team ({}) finished'.format(param_list[0], param_list[1])) 
 
 #create json structure out of the data
 def create_data_json(filepath):
@@ -385,9 +425,6 @@ def main():
     
     print('{} - Preparing data - start'.format(time.perf_counter()))
     
-    #variables
-    kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
-  
     #create json object out of the files
     # '..' -> one folder up
     #dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
@@ -410,11 +447,6 @@ def main():
 
     #list of parameters that are give to each process (tuple of lists)
     params = [] 
-
-    #list of all kafka brokers
-    kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
-    #kafka_brokers = ['kafka-1:9092']
-    #position = 0
 
     # dct_data[STR_WORK] -> tuple of lists. of the structure below
     # ["7", "home", "C:\\Users\\pasca\\HV\\github\\SemesterarbeitCASBGD\\data\\home\\7.csv"]

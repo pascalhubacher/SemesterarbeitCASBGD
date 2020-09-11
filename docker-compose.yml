@@ -71,10 +71,11 @@ services:
       KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-1:19092,LISTENER_DOCKERHOST://localhost:29092,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
-      #if we have more nodes then the replication factior can be risen
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      #if we have more than one kafka node then the replication factor can be set to the # of kafka servers
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      #if we have more than one kafka node then the replication factor can be set to the # of kafka servers
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_DELETE_TOPIC_ENABLE: 'True'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'False'
@@ -84,68 +85,72 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped  
-  #  ================================== Kafka-2 ========================================== #}
-  kafka-2:
-    image: confluentinc/cp-kafka:5.5.0
-    container_name: kafka-2
-    hostname: kafka-2
-    depends_on:
-      - zookeeper-1
-    ports:
-      - 9093:9093
-      - 29093:29093
-      - 9993:9993
-    environment:
-      KAFKA_BROKER_ID: 2
-      KAFKA_BROKER_RACK: r2
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
-      KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-2:19093,LISTENER_DOCKERHOST://kafka-2:29093,LISTENER_EXTERNAL://kafka-2:9093
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-2:19093,LISTENER_DOCKERHOST://localhost:29093,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
-      KAFKA_DELETE_TOPIC_ENABLE: 'True'
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'False'
-      KAFKA_JMX_PORT: 9993
-      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9993
-      KAFKA_JMX_HOSTNAME: kafka-2
-    volumes:
-      - ./data-transfer:/data-transfer
-    restart: unless-stopped
-  #  ================================== Kafka-3 ========================================== #}
-  kafka-3:
-    image: confluentinc/cp-kafka:5.5.0
-    container_name: kafka-3
-    hostname: kafka-3
-    depends_on:
-      - zookeeper-1
-    ports:
-      - 9094:9094
-      - 29094:29094
-      - 9994:9994
-    environment:
-      KAFKA_BROKER_ID: 3
-      KAFKA_BROKER_RACK: r3
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
-      KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-3:19094,LISTENER_DOCKERHOST://kafka-3:29094,LISTENER_EXTERNAL://kafka-3:9094
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-3:19094,LISTENER_DOCKERHOST://localhost:29094,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
-      KAFKA_DELETE_TOPIC_ENABLE: 'True'
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'False'
-      KAFKA_JMX_PORT: 9994
-      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9994
-      KAFKA_JMX_HOSTNAME: kafka-3
-    volumes:
-      - ./data-transfer:/data-transfer
-    restart: unless-stopped
+  # #  ================================== Kafka-2 ========================================== #}
+  # kafka-2:
+  #   image: confluentinc/cp-kafka:5.5.0
+  #   container_name: kafka-2
+  #   hostname: kafka-2
+  #   depends_on:
+  #     - zookeeper-1
+  #   ports:
+  #     - 9093:9093
+  #     - 29093:29093
+  #     - 9993:9993
+  #   environment:
+  #     kafka_broker_id: 2
+  #     kafka_broker_rack: r2
+  #     kafka_zookeeper_connect: zookeeper-1:2181
+  #     kafka_listeners: listener_internal://kafka-2:19093,listener_dockerhost://kafka-2:29093,listener_external://kafka-2:9093
+  #     kafka_advertised_listeners: listener_internal://kafka-2:19093,listener_dockerhost://localhost:29093,listener_external://${public_ip:-127.0.0.1}:9093
+  #     kafka_listener_security_protocol_map: listener_internal:plaintext,listener_dockerhost:plaintext,listener_external:plaintext
+  #     kafka_inter_broker_listener_name: listener_internal
+  #     #if we have more than one kafka node then the replication factor can be set to the # of kafka servers
+  #     kafka_offsets_topic_replication_factor: 3
+  #     kafka_transaction_state_log_min_isr: 1
+  #     #if we have more than one kafka node then the replication factor can be set to the # of kafka servers
+  #     kafka_transaction_state_log_replication_factor: 3
+  #     kafka_group_initial_rebalance_delay_ms: 100
+  #     kafka_delete_topic_enable: 'true'
+  #     kafka_auto_create_topics_enable: 'false'
+  #     kafka_jmx_port: 9993
+  #     kafka_jmx_opts: -dcom.sun.management.jmxremote -dcom.sun.management.jmxremote.authenticate=false -dcom.sun.management.jmxremote.ssl=false -dcom.sun.management.jmxremote.local.only=false -dcom.sun.management.jmxremote.rmi.port=9993
+  #     kafka_jmx_hostname: kafka-2
+  #   volumes:
+  #     - ./data-transfer:/data-transfer
+  #   restart: unless-stopped
+  # #  ================================== kafka-3 ========================================== #}
+  # kafka-3:
+  #   image: confluentinc/cp-kafka:5.5.0
+  #   container_name: kafka-3
+  #   hostname: kafka-3
+  #   depends_on:
+  #     - zookeeper-1
+  #   ports:
+  #     - 9094:9094
+  #     - 29094:29094
+  #     - 9994:9994
+  #   environment:
+  #     kafka_broker_id: 3
+  #     kafka_broker_rack: r3
+  #     kafka_zookeeper_connect: zookeeper-1:2181
+  #     kafka_listeners: listener_internal://kafka-3:19094,listener_dockerhost://kafka-3:29094,listener_external://kafka-3:9094
+  #     kafka_advertised_listeners: listener_internal://kafka-3:19094,listener_dockerhost://localhost:29094,listener_external://${public_ip:-127.0.0.1}:9094
+  #     kafka_listener_security_protocol_map: listener_internal:plaintext,listener_dockerhost:plaintext,listener_external:plaintext
+  #     kafka_inter_broker_listener_name: listener_internal
+  #     #if we have more than one kafka node then the replication factor can be set to the # of kafka servers
+  #     kafka_offsets_topic_replication_factor: 3
+  #     kafka_transaction_state_log_min_isr: 1
+  #     #if we have more than one kafka node then the replication factor can be set to the # of kafka servers
+  #     kafka_transaction_state_log_replication_factor: 3
+  #     kafka_group_initial_rebalance_delay_ms: 100
+  #     kafka_delete_topic_enable: 'true'
+  #     kafka_auto_create_topics_enable: 'false'
+  #     kafka_jmx_port: 9994
+  #     kafka_jmx_opts: -dcom.sun.management.jmxremote -dcom.sun.management.jmxremote.authenticate=false -dcom.sun.management.jmxremote.ssl=false -dcom.sun.management.jmxremote.local.only=false -dcom.sun.management.jmxremote.rmi.port=9994
+  #     kafka_jmx_hostname: kafka-3
+  #   volumes:
+  #     - ./data-transfer:/data-transfer
+  #   restart: unless-stopped
   #  ================================== Schema Registry ========================================== #}
   schema-registry-1:
     image: confluentinc/cp-schema-registry:5.5.0

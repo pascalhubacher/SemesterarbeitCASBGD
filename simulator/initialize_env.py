@@ -23,6 +23,13 @@ STR_AWAY = 'away'
 STR_BALL = 'ball'
 STR_OTHER = 'other'
 
+#variables
+#list of all kafka brokers
+#kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
+kafka_brokers = ['kafka-1:9092']
+#'fbPenaltybox', 'fbPitchRight'
+kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
+
 #create kafka topics
 def kafka_topics_create(broker_list, topic_list):
     kafka_servers_str = ''
@@ -33,7 +40,7 @@ def kafka_topics_create(broker_list, topic_list):
         'bootstrap.servers': kafka_servers_str
     })
     
-    new_topics = [NewTopic(topic, num_partitions=3, replication_factor=3) for topic in topic_list]
+    new_topics = [NewTopic(topic, num_partitions=int(len(broker_list)), replication_factor=int(len(broker_list))) for topic in topic_list]
     # Note: In a multi-cluster production scenario, it is more typical to use a replication_factor of 3 for durability.
 
     # Call create_topics to asynchronously create topics. A dict
@@ -165,11 +172,6 @@ def get_properties(str_filepath, str_parameter):
 def get_player_id(str_filepath, str_suffix='.csv'):
     return(str_filepath[str_filepath.rfind('\\')+1:-len(str_suffix)])
     
-#variables
-#'fbPenaltybox', 'fbPitchRight'
-kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
-kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
-
 #create json object out of the files
 # '..' -> one folder up
 dct_data = create_data_json(os.path.join(os.path.dirname( __file__ ), 'data'))
@@ -192,4 +194,4 @@ for kafka_topic in kafka_topics:
     else:
         print('kafka topic ('+kafka_topic+') already exists.')
 
-#fill in the match evetn into the rawMetaMatch topic
+#fill in the match config data into the rawMetaMatch topic

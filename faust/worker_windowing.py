@@ -26,6 +26,11 @@ MATCH_ID = whatsTheMatchId('rawMetaMatch')
 BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
 
 #variables
+#list of all kafka brokers
+#kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
+kafka_brokers = ['kafka-1:9092']
+kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
+
 windows_size = 1 #second
 events_per_second = 25
 number_of_players_plus_ball = 23
@@ -53,7 +58,7 @@ class GameEvent(faust.Record, serializer='json'):
     id: str
     matchid: str
 
-app = faust.App('faustFbWindowing', broker='kafka://kafka-1:9092', topic_partitions=1, value_serializer='raw')
+app = faust.App('faustFbWindowing', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 fbCloseToBallTopic = app.topic('fbBallPossession', value_type=GameEvent)
 
