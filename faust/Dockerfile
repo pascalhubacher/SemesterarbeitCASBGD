@@ -11,7 +11,7 @@ RUN echo 'deb [check-valid-until=no] http://archive.debian.org/debian jessie-bac
     && apt-get update \
     && apt-get install -y --no-install-recommends apt-utils \
     && apt-get install dos2unix
-RUN apt-get install -y netcat && apt-get autoremove -y && apt-get install dos2unix -y
+RUN apt-get install -y netcat && apt-get autoremove -y && apt-get install dos2unix -y && apt-get install vim -y
 
 # clone repository with data
 #RUN git clone https://github.com/pascalhubacher/SemesterarbeitCASBGD.git
@@ -37,12 +37,11 @@ RUN dos2unix -ascii wait_for_services.sh
 #create the topic if needed for the faust listener because if it does not exist the faust listener stops 
 #COPY ./initialize_env.py .
 #faust listener
-COPY ./workerRawGames.py .
+COPY ./worker_fbRawGames.py .
 
 #to create an event manually with faust (testing)
 #faust -A create_event send @greet '{"ts": "40", "x": "-0.38", "y": "-2.23", "z": "0.0", "id": "10"}'
 COPY ./create_event.py .
-COPY ./worker_windowing.py .
 
 ###############################################################################
 CMD ["./wait_for_services.sh"]

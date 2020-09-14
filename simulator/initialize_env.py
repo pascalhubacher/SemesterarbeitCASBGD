@@ -28,7 +28,8 @@ STR_OTHER = 'other'
 #kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
 kafka_brokers = ['kafka-1:9092']
 #'fbPenaltybox', 'fbPitchRight'
-kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
+kafka_topics = ['rawGames', 'fbBallPossession']
+#kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 
 #create kafka topics
 def kafka_topics_create(broker_list, topic_list):

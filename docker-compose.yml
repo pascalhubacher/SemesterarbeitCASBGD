@@ -19,18 +19,19 @@
 #root@simulator-1:/usr/src/app# python3 simulator.py
 
 #kSQLDB-CLI
+#to create the meta tables
 #docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
+#RUN SCRIPT '/data-transfer/initKafkaTopics.sql'
 
 #faust
 #docker exec -it semesterarbeitcasbgd_faust-1_1 bash
 #copy new version from data-transferto the app folder
-#cp data-transfer/worker_windowing.py .
+#cp data-transfer/worker_fbRawGames.py .
 #start faust worker
-#faust -A worker_windowing worker -l info
+#faust -A worker_fbRawGames worker -l info
 #send value to topic
 #faust -A create_event send @greet -k '19060518.200' '{"ts": "2018-06-29T08:15:27.243860", "x": "-0.38", "y": "-2.23", "z": "0.0", "id": "200", "matchid": "19060518"}'
 #faust -A create_event send @greet -k '19060518.10' '{"ts": "2018-06-29T08:15:27.243860", "x": "-0.39", "y": "-2.24", "z": "0.0", "id": "10", "matchid": "19060518"}'
-#if the topic 'faustFbWindowing-windowedTable-key_index-changelog' is not created by faust the create it beforehand in the akhq gui as it is an error in faust not to create it when you start the worker
 
 version: '3'
 # enforce some dependencies
