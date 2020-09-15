@@ -1,5 +1,5 @@
 import faust
-import time, math
+import time, datetime, math
 
 def whatsTheBallId(metadataTopic):
     return('200')
@@ -28,12 +28,16 @@ BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
 kafka_brokers = ['kafka-1:9092']
 kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 
-windows_size = 1 #second
+windows_size = 3 #second
 events_per_second = 25
 number_of_players_plus_ball = 23
-max_events = windows_size * events_per_second * number_of_players_plus_ball
+#max_events = windows_size * events_per_second * number_of_players_plus_ball
+max_elements_in_window = windows_size * events_per_second
+
+ball_possession_threshold = 0.5
+
 print('windows_size', windows_size)
-print('max_events', max_events)
+print('max_events', max_elements_in_window)
 
 #json data in the stream
 #key=19060518.10
@@ -55,19 +59,67 @@ class GameEvent(faust.Record, serializer='json'):
     id: str
     matchid: str
 
+#, serializer='json'
+class GameState(faust.Record, serializer='json'):
+    ts: str
+    eventtype: str
+    matchid: str
+    description: str
+#BallPossessionChange (json in the description field)
+#playerId, playerName, playerAlias, objectType (0-> Ball, 1-> Home, 2->Away)
+
 app = faust.App('faustFbTableBallPossession2', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
-#topic all the events of all games are sent to it
-rawGameTopic = app.topic('rawGames', value_type=GameEvent)
-#topic to write into it if a player is close to the ball
+#app2 = faust.App('faustFbTableBallPossession3', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
+#fbCloseToBallTopic = app2.topic('fbBallPossession', value_type=GameEvent)
+
+#topic to listen to
 fbCloseToBallTopic = app.topic('fbBallPossession', value_type=GameEvent)
+#fbtest = app.topic('rawMetaPlayer', value_type='json').stream().take(1,1)
+
 #Table to save the latest element of each player and the ball
-ballPossessionTable = app.Table('ballPossessionTable', default=GameEvent)
+ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tumbling(datetime.timedelta(seconds=windows_size), expires=datetime.timedelta(seconds=windows_size))
+
+#topic to write for all Events that are shown
+fbEvents = app.topic('fbEvents', value_type=GameState)
+
+print('--------')
+#print(fbtest)
+print('--------')
+
+@app.agent(fbCloseToBallTopic)
+async def process(stream):
+    async for records in stream.take(max_elements_in_window, within=windows_size):
+        print('-----'+str(max_elements_in_window)+'-----')
+
+        async for w in app.topic('rawMetaPlayer', value_type='json').stream().take(1,1):
+            print(w)
+
+        #print(len(records))
+        #<GameEvent: ts='2019.06.05T20:45:14.320000', x='-33.53', y='-11.4', z='0.0', id='3', matchid='19060518'>
+        counter_dict = {}
+        for record in records:
+            if record.id in counter_dict.keys():
+                counter_dict[record.id] += 1
+            else:
+                counter_dict[record.id] = 0
+        #create sorted list (ascending) of sets (id, count)
+        sorted_list = sorted(counter_dict.items(), key=lambda kv: kv[1])
+
+        if not len(sorted_list) == 0:
+            #only create an event if the player is < 3m to the ball and is the closes for 70% of the time within the three seconds
+            # # of times the player was the closest to the ball and within 3m / max of elements possible in a window -> must be bigger than the threshold
+            if float(sorted_list[-1][1])/float(max_elements_in_window) >= ball_possession_threshold:
+                #get player data
 
 
+                # Topic BallPossessionChange
+                print(sorted_list[-1])
+                #await fbEvents.send(key=bytes(str(MATCH_ID), 'utf-8'), value=str(''))
+        
+        print('-----')
 
-# @app.agent(rawGameTopic)
-# async def process(stream):
-#     async for key, value in stream.items():
+
+#    async for key, value in stream.items():
 #         #only work with the elements of the MATCH_ID
 #         if key.decode("utf-8").split('.')[0] == MATCH_ID:
 #             #print('--START--')
@@ -133,14 +185,12 @@ ballPossessionTable = app.Table('ballPossessionTable', default=GameEvent)
 #     #        print(f'RECEIVED {len(values)} with key xy')
 
 #@app.agent(fbCloseToBallTopic)
-@app.timer(3.0)
-async def my_periodic_task():
-    print('THREE SECONDS PASSED')
+# @app.timer(3.0)
+# async def my_periodic_task():
+#     print('THREE SECONDS PASSED')
     # async def process(stream):
     #     async for key, value in stream.items():
     #         print(value)
 
 #if __name__ == '__main__':
 #    app.main()
-
-
