@@ -1,5 +1,5 @@
 import faust
-import time, datetime, math
+import time, datetime, math, json, os
 
 def whatsTheBallId(metadataTopic):
     return('200')
@@ -17,14 +17,27 @@ def ballPossession(playerId, ballId, distance=3):
 def euclidianDistance(ball_set, player_set):
     return(math.sqrt((float(ball_set[0]) - float(player_set[0]))**2 + (float(ball_set[1]) - float(player_set[1]))**2 + (float(ball_set[2]) - float(player_set[2]))**2))
 
+# (True, properties in json format) -> if id found
+# (False, None) -> if not found
+def getListOfPropertiesOfItem(str_json, element):
+    #json_str = json.loads(str_json)
+    if not str_json.get(element) == None:
+        #found
+        return((True, str_json.get(element)))
+    else:
+        #not found
+        return((False, None))
+
 #GLOBALS
 BALL_ID = whatsTheBallId('rawMetaMatch')
 MATCH_ID = whatsTheMatchId('rawMetaMatch')
 BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
+#who had the Ball in the last event
+BALL_POSSESSION_ID = str(MATCH_ID)
 
 # Open playser JSON file
 with open(os.path.join(os.getcwd(), 'player.json')) as json_file: 
-    player_data = = json.load(json_file)
+    player_data = json.load(json_file)
 
 #variables
 #list of all kafka brokers
@@ -32,7 +45,7 @@ with open(os.path.join(os.getcwd(), 'player.json')) as json_file:
 kafka_brokers = ['kafka-1:9092']
 kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 
-windows_size = 3 #second
+windows_size = 1 #second
 events_per_second = 25
 number_of_players_plus_ball = 23
 #max_events = windows_size * events_per_second * number_of_players_plus_ball
@@ -42,6 +55,7 @@ ball_possession_threshold = 0.5
 
 print('windows_size', windows_size)
 print('max_events', max_elements_in_window)
+print('ddddd', BALL_POSSESSION_ID)
 
 #json data in the stream
 #key=19060518.10
@@ -85,6 +99,9 @@ ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tu
 #topic to write for all Events that are shown
 fbEvents = app.topic('fbEvents', value_type=GameState)
 
+#last ball time stamp
+time_stamp = ''
+
 @app.agent(fbCloseToBallTopic)
 async def process(stream):
     async for records in stream.take(max_elements_in_window, within=windows_size):
@@ -94,10 +111,12 @@ async def process(stream):
         #<GameEvent: ts='2019.06.05T20:45:14.320000', x='-33.53', y='-11.4', z='0.0', id='3', matchid='19060518'>
         counter_dict = {}
         for record in records:
+            #get timestamp
+            time_stamp = record.ts
             if record.id in counter_dict.keys():
                 counter_dict[record.id] += 1
             else:
-                counter_dict[record.id] = 0
+                counter_dict[record.id] = 1
         #create sorted list (ascending) of sets (id, count)
         sorted_list = sorted(counter_dict.items(), key=lambda kv: kv[1])
 
@@ -105,12 +124,23 @@ async def process(stream):
             #only create an event if the player is < 3m to the ball and is the closes for 70% of the time within the three seconds
             # # of times the player was the closest to the ball and within 3m / max of elements possible in a window -> must be bigger than the threshold
             if float(sorted_list[-1][1])/float(max_elements_in_window) >= ball_possession_threshold:
-                #get player data
+                # Topic BallPossessionChange 
+                print(sorted_list)
+                                
+                #set variable to global
+                global BALL_POSSESSION_ID
 
+                #is there player information for the match id and player id
+                if not BALL_POSSESSION_ID == str(MATCH_ID)+'.'+str(sorted_list[-1][0]):
+                    #last player with ball possession
+                    BALL_POSSESSION_ID = str(MATCH_ID)+'.'+str(sorted_list[-1][0])
+                    if getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[0]:
+                        player_info = getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[1]
+                        print(json.dumps(player_info), time_stamp)
+                        #"<GameState: ts='2019.06.05T20:45:14.320000', eventtype='BallPossessionChange', matchid='19060518', description="
+                        #"<GameState: ts="+str(time_stamp)+", eventtype='BallPossessionChange', matchid="+str(MATCH_ID)+", description="+str(json.dumps(player_info))+">"
 
-                # Topic BallPossessionChange
-                print(sorted_list[-1])
-                #await fbEvents.send(key=bytes(str(MATCH_ID), 'utf-8'), value=str(''))
+                        await fbEvents.send(key=bytes(str(MATCH_ID), 'utf-8'), value="<GameState: ts="+str(time_stamp)+", eventtype='BallPossessionChange', matchid="+str(MATCH_ID)+", description="+str(json.dumps(player_info))+">")
         
         print('-----')
 

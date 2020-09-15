@@ -28,7 +28,7 @@ STR_OTHER = 'other'
 #kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
 kafka_brokers = ['kafka-1:9092']
 #'fbPenaltybox', 'fbPitchRight'
-kafka_topics = ['rawGames', 'fbBallPossession']
+kafka_topics = ['rawGames', 'fbBallPossession', 'fbEvents']
 #kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 
 #create kafka topics
@@ -201,3 +201,16 @@ from ksql import KSQLAPI
 #logging.basicConfig(level=logging.DEBUG)
 client = KSQLAPI(url='http://ksqldb-server-1:8088', timeout=5)
 
+# data = []
+# try:
+#     query = client.query('SELECT * FROM t_rawMetaPlayer EMIT CHANGES', use_http2=True)
+#     for idx, item in enumerate(query):
+#         if item[0] == '{':
+#             queryId = json.loads(item)['queryId']
+#             #print(queryId)
+#         #print(item)
+#         data.append(item)
+#         if idx == 23:
+#             client.close_query(queryId)
+# except Exception as e:
+#     print(e)

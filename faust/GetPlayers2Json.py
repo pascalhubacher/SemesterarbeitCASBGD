@@ -29,7 +29,7 @@ except Exception as e:
 player_json = {}
 #skip first row
 for element in data[1:]:
-    element = element.strip().replace('[','').replace(']','').split(',')
+    element = element.strip().replace('[','').replace(']','').replace('"','').split(',')
     #'["19060518.1",19060518,1,"Patricio","A1",1]\n'
     key = element[0]
     print(key)

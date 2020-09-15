@@ -19,21 +19,56 @@ DROP TABLE IF EXISTS t_rawMetaMatch delete topic;
 DROP TABLE IF EXISTS t_rawMetaPlayer delete topic;
 DROP TABLE IF EXISTS t_fbFieldPos delete topic;
 
+
+
 -- Tabelle mit Topic rawMetaMatch neu erstellen
-CREATE TABLE t_rawMetaMatch (rowKey VARCHAR PRIMARY KEY, gameId BIGINT, pitchXSize DOUBLE, pitchYSize DOUBLE) WITH (KAFKA_TOPIC='rawMetaMatch', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+CREATE TABLE t_rawMetaMatch (
+  rowKey VARCHAR PRIMARY KEY, 
+  gameId BIGINT, 
+  pitchXSize DOUBLE, 
+  pitchYSize DOUBLE) 
+WITH (KAFKA_TOPIC='rawMetaMatch', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+
+
 
 -- Tabelle mit Topic fbFieldPos neu erstellen
-CREATE TABLE t_fbFieldPos ( rowKey VARCHAR PRIMARY KEY, gameId BIGINT, pitchXmax DOUBLE, pitchYmin DOUBLE, pitchYmax DOUBLE) WITH (KAFKA_TOPIC='fbFieldPos', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+CREATE TABLE t_fbFieldPos (
+  rowKey VARCHAR PRIMARY KEY, 
+  gameId BIGINT, 
+  pitchXmax DOUBLE, 
+  pitchYmin DOUBLE, 
+  pitchYmax DOUBLE) 
+WITH (KAFKA_TOPIC='fbFieldPos', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+
+
 
 -- Tabelle mit Topic rawMetaPlayer neu erstellen (Sensor-Objekte; Spieler, Ball)
--- 0=Ball; 1=Player Home Team; 2=Player Away Team 
-CREATE TABLE t_rawMetaPlayer (rowKey VARCHAR PRIMARY KEY, gameId BIGINT, sensorId INT, name varchar, alias varchar, objectType int) WITH (KAFKA_TOPIC='rawMetaPlayer', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+CREATE TABLE t_rawMetaPlayer (
+  rowKey VARCHAR PRIMARY KEY, 
+  gameId BIGINT, 
+  sensorId INT, 
+  name varchar, 
+  alias varchar, 
+  objectType int) -- 0=Ball; 1=Player Home Team; 2=Player Away Team 
+WITH (KAFKA_TOPIC='rawMetaPlayer', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+
+
 
 --------------------
 -- Daten einfügen
 
 -- Daten in Topic fbFieldPos schreiben
-CREATE TABLE t_calcBasePos WITH (kafka_topic='fbFieldPos', value_format='JSON', partitions=1) AS SELECT gameId, -(PITCHXSIZE/2) AS pitchXmin, (PITCHXSIZE/2) AS pitchXmax, -(PITCHYSIZE/2) AS pitchYmin, (PITCHYSIZE/2) AS pitchYmax FROM t_rawMetaMatch EMIT CHANGES;
+CREATE TABLE t_calcBasePos
+  WITH (kafka_topic='fbFieldPos',
+        value_format='JSON', 
+        partitions=1)
+AS 
+SELECT gameId, -(PITCHXSIZE/2) AS pitchXmin, (PITCHXSIZE/2) AS pitchXmax, 
+-(PITCHYSIZE/2) AS pitchYmin, (PITCHYSIZE/2) AS pitchYmax FROM t_rawMetaMatch
+EMIT CHANGES;
+
+
+
 
 -- Spieldaten in Topic rawMetaMatch einfügen
 INSERT INTO t_rawMetaMatch (rowKey, gameId, pitchXSize , pitchYSize ) VALUES ('19060518', 19060518, 105.0, 68.0);
@@ -65,10 +100,13 @@ INSERT INTO t_rawMetaPlayer (rowKey, gameId, sensorId, name, alias, objectType) 
 INSERT INTO t_rawMetaPlayer (rowKey, gameId, sensorId, name, alias, objectType) VALUES ('19060518.122', 19060518, 122 , 'Schaer' , 'B10' , 2);
 INSERT INTO t_rawMetaPlayer (rowKey, gameId, sensorId, name, alias, objectType) VALUES ('19060518.123', 19060518, 123 , 'Shaqiri' , 'B11' , 2);
 
+
+
 -- Konfiguration der Tabelle ausgeben
 --DESCRIBE EXTENDED t_rawMetaMatch;
 --DESCRIBE EXTENDED t_rawMetaPlayer;
 --DESCRIBE EXTENDED t_calcBasePos;
+
 
 -- Daten abfragen
 --SELECT * FROM t_fbFieldPos EMIT CHANGES;
