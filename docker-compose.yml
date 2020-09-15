@@ -85,6 +85,7 @@ services:
       KAFKA_JMX_HOSTNAME: kafka-1
     volumes:
       - ./data-transfer:/data-transfer
+      #- ./kafka/data1:/var/lib/kafka/data
     restart: unless-stopped  
   # #  ================================== Kafka-2 ========================================== #}
   # kafka-2:
@@ -118,6 +119,7 @@ services:
   #     kafka_jmx_hostname: kafka-2
   #   volumes:
   #     - ./data-transfer:/data-transfer
+  #      #- ./kafka/data2:/var/lib/kafka/data
   #   restart: unless-stopped
   # #  ================================== kafka-3 ========================================== #}
   # kafka-3:
@@ -151,6 +153,7 @@ services:
   #     kafka_jmx_hostname: kafka-3
   #   volumes:
   #     - ./data-transfer:/data-transfer
+  #      #- ./kafka/data3:/var/lib/kafka/data
   #   restart: unless-stopped
   #  ================================== Schema Registry ========================================== #}
   schema-registry-1:
