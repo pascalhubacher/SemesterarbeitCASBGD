@@ -40,7 +40,7 @@ COPY ./requirements.txt .
 COPY ./data/ ./data/
 
 # copy the ksql script to the image
-#COPY ./initKafkaTopics.sql .
+COPY ./initKafkaTopics.sql .
 
 # update pip
 RUN pip install --upgrade pip

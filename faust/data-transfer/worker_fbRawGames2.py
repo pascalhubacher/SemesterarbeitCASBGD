@@ -22,6 +22,10 @@ BALL_ID = whatsTheBallId('rawMetaMatch')
 MATCH_ID = whatsTheMatchId('rawMetaMatch')
 BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
 
+# Open playser JSON file
+with open(os.path.join(os.getcwd(), 'player.json')) as json_file: 
+    player_data = = json.load(json_file)
+
 #variables
 #list of all kafka brokers
 #kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
@@ -74,7 +78,6 @@ app = faust.App('faustFbTableBallPossession2', broker=kafka_brokers, topic_parti
 
 #topic to listen to
 fbCloseToBallTopic = app.topic('fbBallPossession', value_type=GameEvent)
-#fbtest = app.topic('rawMetaPlayer', value_type='json').stream().take(1,1)
 
 #Table to save the latest element of each player and the ball
 ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tumbling(datetime.timedelta(seconds=windows_size), expires=datetime.timedelta(seconds=windows_size))
@@ -82,17 +85,10 @@ ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tu
 #topic to write for all Events that are shown
 fbEvents = app.topic('fbEvents', value_type=GameState)
 
-print('--------')
-#print(fbtest)
-print('--------')
-
 @app.agent(fbCloseToBallTopic)
 async def process(stream):
     async for records in stream.take(max_elements_in_window, within=windows_size):
         print('-----'+str(max_elements_in_window)+'-----')
-
-        async for w in app.topic('rawMetaPlayer', value_type='json').stream().take(1,1):
-            print(w)
 
         #print(len(records))
         #<GameEvent: ts='2019.06.05T20:45:14.320000', x='-33.53', y='-11.4', z='0.0', id='3', matchid='19060518'>

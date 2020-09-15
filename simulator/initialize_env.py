@@ -196,3 +196,8 @@ for kafka_topic in kafka_topics:
         print('kafka topic ('+kafka_topic+') already exists.')
 
 #fill in the match config data into the rawMetaMatch topic
+#import logging
+from ksql import KSQLAPI
+#logging.basicConfig(level=logging.DEBUG)
+client = KSQLAPI(url='http://ksqldb-server-1:8088', timeout=5)
+

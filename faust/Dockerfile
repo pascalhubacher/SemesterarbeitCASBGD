@@ -33,6 +33,9 @@ COPY ./wait_for_services.sh .
 # convert the file from windows format to unix format
 RUN dos2unix -ascii wait_for_services.sh
 
+# copy create player json to local file
+COPY ./GetPlayers2Json.py .
+
 #copy python faust worker script
 #create the topic if needed for the faust listener because if it does not exist the faust listener stops 
 #COPY ./initialize_env.py .

@@ -18,6 +18,9 @@ done
 >&2 echo "Wait 60 seconds to start the faust agent up"
 #sleep 60
 
+#read the t_rawMetaPlayer topic and save the playerinfo locally as player.json
+python3 GetPlayers2Json.py
+
 #cd ./data-transfer
 
 #faust worker script

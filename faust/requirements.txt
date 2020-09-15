@@ -3,3 +3,4 @@ avro
 requests
 faust
 numpy
+ksql
