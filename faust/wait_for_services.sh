@@ -22,10 +22,9 @@ done
 #read the t_rawMetaPlayer topic and save the playerinfo locally as player.json
 #python3 GetPlayers2Json.py
 
-#cd ./data-transfer
-
 #faust worker script
-#>&2 echo "Starting faust worker listening on RawGames"
+#>&2 echo "Starting faust worker listening on RawGames and send it in the background
 #faust -A worker_fbRawGames worker -l info --without-web &
-#faust -A worker_fbRawGames2 worker -l info --without-web &
+#>&2 echo "Starting faust worker listening on fbBallPossession and send it in the background
+#faust -A worker_fbBallPossession worker -l info --without-web &
 bash
