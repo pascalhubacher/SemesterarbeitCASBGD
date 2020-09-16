@@ -2,6 +2,27 @@
 # Platform: STREAMTEAM default
 # =====================================================
 
+#setup procedure
+#set ip address -> ipconfig
+#set PUBLIC_IP=192.168.1.203
+#set DOCKER_HOST_IP=192.168.1.203
+#docker-compose up --build --remove-orphans
+#---------------------
+#open a new cmd prompt
+#docker exec -it semesterarbeitcasbgd_faust-1_1 bash
+#python3 GetPlayers2Json.py
+#faust -A worker_fbRawGames worker -l info --without-web
+#---------------------
+#open a new cmd prompt
+#docker exec -it semesterarbeitcasbgd_faust-1_1 bash
+#faust -A worker_fbBallPossession worker -l info --without-web
+#---------------------
+#open a new cmd prompt
+#docker exec -it semesterarbeitcasbgd_simulator-1_1 bash
+#python3 simulator.py
+#ctrl-c (stop environment)
+#docker-compose down
+
 #ALL
 #docker-compose up --build --remove-orphans
 #docker-compose down

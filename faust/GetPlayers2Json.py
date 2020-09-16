@@ -32,7 +32,7 @@ for element in data[1:]:
     element = element.strip().replace('[','').replace(']','').replace('"','').split(',')
     #'["19060518.1",19060518,1,"Patricio","A1",1]\n'
     key = element[0]
-    print(key)
+    #print(key)
     player_json[key] = {}
     player_json[key]['playerId'] = element[2]
     player_json[key]['playerName'] = element[3]

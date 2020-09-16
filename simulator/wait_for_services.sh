@@ -19,13 +19,12 @@ done
 echo "Initializing environment (topics)"
 python3 initialize_env.py
 
-#
-#echo "Create Metadata"
-#ksql 'http://localhost:8088' << EOF RUN SCRIPT 'initKafkaTopics.sql'; exit EOF
+# execute ksql file line by line
+echo "Execute ksql commands"
+python3 ksql_execute.py
 
 sleep 90
 
 #simulator
 #python3 simulator.py
-
 bash

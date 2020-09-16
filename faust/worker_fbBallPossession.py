@@ -86,7 +86,7 @@ class GameState(faust.Record, serializer='json'):
 #BallPossessionChange (json in the description field)
 #playerId, playerName, playerAlias, objectType (0-> Ball, 1-> Home, 2->Away)
 
-app = faust.App('faustFbTableBallPossession2', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
+app = faust.App('faustFbfbBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #app2 = faust.App('faustFbTableBallPossession3', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #fbCloseToBallTopic = app2.topic('fbBallPossession', value_type=GameEvent)
 
@@ -137,11 +137,13 @@ async def process(stream):
                     if getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[0]:
                         player_info = getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[1]
                         print(json.dumps(player_info), time_stamp)
+                        
+                        #sent record to topic 'fbEvents'
                         #"<GameState: ts='2019.06.05T20:45:14.320000', eventtype='BallPossessionChange', matchid='19060518', description="
-                        #"<GameState: ts="+str(time_stamp)+", eventtype='BallPossessionChange', matchid="+str(MATCH_ID)+", description="+str(json.dumps(player_info))+">"
+                        await fbEvents.send(key=bytes(str(MATCH_ID), 'utf-8'), value=GameState(ts=str(time_stamp), eventtype=str('BallPossessionChange'), matchid=str(MATCH_ID), description=str(json.dumps(player_info))))
+                else:
+                    print('Same player as before')
 
-                        await fbEvents.send(key=bytes(str(MATCH_ID), 'utf-8'), value="<GameState: ts="+str(time_stamp)+", eventtype='BallPossessionChange', matchid="+str(MATCH_ID)+", description="+str(json.dumps(player_info))+">")
-        
         print('-----')
 
 

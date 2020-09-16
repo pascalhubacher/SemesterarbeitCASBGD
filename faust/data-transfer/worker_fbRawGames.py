@@ -55,7 +55,7 @@ class GameEvent(faust.Record, serializer='json'):
     id: str
     matchid: str
 
-app = faust.App('faustFbTableBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
+app = faust.App('faustFbrawGames', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #topic all the events of all games are sent to it
 rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 #topic to write into it if a player is close to the ball
@@ -99,7 +99,10 @@ async def process(stream):
                         if elem[2] < best[2]:
                             best = elem
                     #print(best)
-                    await fbCloseToBallTopic.send(key=bytes(str(best[0]), 'utf-8'), value=best[1])
+
+                    #send record to topic 'fbCloseToBallTopic'
+                    await fbCloseToBallTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=best[1].ts, x=best[1].x, y=best[1].y, z=best[1].z, id=best[1].id, matchid=best[1].matchid))
+                    #await fbCloseToBallTopic.send(key=bytes(str(best[0]), 'utf-8'), value=best[1])
 
             #timer 3sec
             #80% ball possession -> write topic -> ball posession state

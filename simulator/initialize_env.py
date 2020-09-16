@@ -194,23 +194,3 @@ for kafka_topic in kafka_topics:
         print('kafka topic ('+kafka_topic+') created.')
     else:
         print('kafka topic ('+kafka_topic+') already exists.')
-
-#fill in the match config data into the rawMetaMatch topic
-#import logging
-from ksql import KSQLAPI
-#logging.basicConfig(level=logging.DEBUG)
-client = KSQLAPI(url='http://ksqldb-server-1:8088', timeout=5)
-
-# data = []
-# try:
-#     query = client.query('SELECT * FROM t_rawMetaPlayer EMIT CHANGES', use_http2=True)
-#     for idx, item in enumerate(query):
-#         if item[0] == '{':
-#             queryId = json.loads(item)['queryId']
-#             #print(queryId)
-#         #print(item)
-#         data.append(item)
-#         if idx == 23:
-#             client.close_query(queryId)
-# except Exception as e:
-#     print(e)

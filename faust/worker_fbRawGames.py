@@ -12,7 +12,7 @@ def ballPossession(playerId, ballId, distance=3):
     if dist < 3:
         return((True, dist))
     else:
-        return(False)
+        return(False, -1)
 
 def euclidianDistance(ball_set, player_set):
     return(math.sqrt((float(ball_set[0]) - float(player_set[0]))**2 + (float(ball_set[1]) - float(player_set[1]))**2 + (float(ball_set[2]) - float(player_set[2]))**2))
@@ -31,9 +31,9 @@ kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 windows_size = 1 #second
 events_per_second = 25
 number_of_players_plus_ball = 23
-max_events = windows_size * events_per_second * number_of_players_plus_ball
-print('windows_size', windows_size)
-print('max_events', max_events)
+#max_events = windows_size * events_per_second * number_of_players_plus_ball
+#print('windows_size', windows_size)
+#print('max_events', max_events)
 
 #json data in the stream
 #key=19060518.10
@@ -55,15 +55,13 @@ class GameEvent(faust.Record, serializer='json'):
     id: str
     matchid: str
 
-app = faust.App('faustFbTableBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
+app = faust.App('faustFbrawGames', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #topic all the events of all games are sent to it
 rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 #topic to write into it if a player is close to the ball
 fbCloseToBallTopic = app.topic('fbBallPossession', value_type=GameEvent)
 #Table to save the latest element of each player and the ball
 ballPossessionTable = app.Table('ballPossessionTable', default=GameEvent)
-
-
 
 @app.agent(rawGameTopic)
 async def process(stream):
@@ -80,24 +78,30 @@ async def process(stream):
 
             if key == bytes(BALL_KEY, 'utf-8'):
                 ball = ballPossessionTable[bytes(BALL_KEY, 'utf-8')]
+                #print(ball)
                 elements = []
                 for key_elem, value_elem in zip(ballPossessionTable.keys(), ballPossessionTable.values()):
                     if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (str(value_elem) == ''):
+                        #print('--key--')
+                        #print(key_elem)
                         dist = ballPossession((value_elem.x, value_elem.y, value_elem.z), (ball.x, ball.y, ball.z))
                         if dist[0]:
                             #create list element in a set
                             elements.append((key_elem, value_elem, dist[1]))
 
                 if not len(elements) == 0:
-                    print(elements)
+                    #print('---if--')
+                    #print(elements)
                     #write to 'fbBallPossession' topic
                     # if more than 1 player is close to the ball then the closest has ball possession
                     best = elements[0]
                     for elem in elements:
                         if elem[2] < best[2]:
                             best = elem
-                    print(best)
-                    await fbCloseToBallTopic.send(key=best[0], value=best[1])
+                    #print(best)
+
+                    #send record to topic 'fbCloseToBallTopic'
+                    await fbCloseToBallTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=best[1].ts, x=best[1].x, y=best[1].y, z=best[1].z, id=best[1].id, matchid=best[1].matchid))
 
             #timer 3sec
             #80% ball possession -> write topic -> ball posession state
@@ -132,11 +136,17 @@ async def process(stream):
     #    async for values in stream.take(max_events, within=windows_size):
     #        print(f'RECEIVED {len(values)} with key xy')
 
-@app.timer(3.0)
-async def my_periodic_task():
-    print('THREE SECONDS PASSED')
+# app2 = faust.App('faustFbTableBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
+# @app2.agent(fbCloseToBallTopic)
+# @app2.timer(3.0)
+# async def my_periodic_task():
+#     print('THREE SECONDS PASSED')
+#     # async def process2(stream2):
+#     # #async for key, value in stream.items():
+#     #     async for elements in stream2.take(100, within=3.0):
+#     #         print(elements)
 
-#if __name__ == '__main__':
-#    app.main()
+# if __name__ == '__main__':
+#     app.main()
 
 

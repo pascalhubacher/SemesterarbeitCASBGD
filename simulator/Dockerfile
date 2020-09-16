@@ -39,8 +39,9 @@ COPY ./requirements.txt .
 # copy all the game data to the image
 COPY ./data/ ./data/
 
-# copy the ksql script to the image
+# copy the ksql script and the python script that executes it via ksql api to the image
 COPY ./initKafkaTopics.sql .
+COPY ./ksql_execute.py .
 
 # update pip
 RUN pip install --upgrade pip

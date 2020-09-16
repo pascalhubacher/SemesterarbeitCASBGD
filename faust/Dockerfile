@@ -36,11 +36,13 @@ RUN dos2unix -ascii wait_for_services.sh
 # copy create player json to local file
 COPY ./GetPlayers2Json.py .
 
-#copy python faust worker script
 #create the topic if needed for the faust listener because if it does not exist the faust listener stops 
 #COPY ./initialize_env.py .
+
 #faust listener
+#copy python faust worker scripts
 COPY ./worker_fbRawGames.py .
+COPY ./worker_fbBallPossession.py .
 
 #to create an event manually with faust (testing)
 #faust -A create_event send @greet '{"ts": "40", "x": "-0.38", "y": "-2.23", "z": "0.0", "id": "10"}'
