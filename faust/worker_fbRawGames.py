@@ -1,6 +1,12 @@
 import faust
 import time, math
 
+#GLOBALS
+ballPossessionDistance = 3
+BALL_ID = whatsTheBallId('rawMetaMatch')
+MATCH_ID = whatsTheMatchId('rawMetaMatch')
+BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
+
 def whatsTheBallId(metadataTopic):
     return('200')
 
@@ -16,11 +22,6 @@ def ballPossession(playerId, ballId, distance=3):
 
 def euclidianDistance(ball_set, player_set):
     return(math.sqrt((float(ball_set[0]) - float(player_set[0]))**2 + (float(ball_set[1]) - float(player_set[1]))**2 + (float(ball_set[2]) - float(player_set[2]))**2))
-
-#GLOBALS
-BALL_ID = whatsTheBallId('rawMetaMatch')
-MATCH_ID = whatsTheMatchId('rawMetaMatch')
-BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
 
 #variables
 #list of all kafka brokers
@@ -84,7 +85,7 @@ async def process(stream):
                     if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (str(value_elem) == ''):
                         #print('--key--')
                         #print(key_elem)
-                        dist = ballPossession((value_elem.x, value_elem.y, value_elem.z), (ball.x, ball.y, ball.z))
+                        dist = ballPossession((value_elem.x, value_elem.y, value_elem.z), (ball.x, ball.y, ball.z), distance=ballPossessionDistance)
                         if dist[0]:
                             #create list element in a set
                             elements.append((key_elem, value_elem, dist[1]))

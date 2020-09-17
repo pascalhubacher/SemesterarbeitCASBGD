@@ -45,15 +45,15 @@ with open(os.path.join(os.getcwd(), 'player.json')) as json_file:
 kafka_brokers = ['kafka-1:9092']
 kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 
-windows_size = 1 #second
+ballPossessionWindow = 1 #second
+ballPossessionThreshold = 0.5
+
 events_per_second = 25
 number_of_players_plus_ball = 23
-#max_events = windows_size * events_per_second * number_of_players_plus_ball
-max_elements_in_window = windows_size * events_per_second
+#max_events = ballPossessionWindow * events_per_second * number_of_players_plus_ball
+max_elements_in_window = ballPossessionWindow * events_per_second
 
-ball_possession_threshold = 0.5
-
-print('windows_size', windows_size)
+print('ballPossessionWindow', ballPossessionWindow)
 print('max_events', max_elements_in_window)
 
 #json data in the stream
@@ -93,7 +93,7 @@ app = faust.App('faustFbfbBallPossession', broker=kafka_brokers, topic_partition
 fbCloseToBallTopic = app.topic('fbBallPossession', value_type=GameEvent)
 
 #Table to save the latest element of each player and the ball
-ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tumbling(datetime.timedelta(seconds=windows_size), expires=datetime.timedelta(seconds=windows_size))
+ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tumbling(datetime.timedelta(seconds=ballPossessionWindow), expires=datetime.timedelta(seconds=ballPossessionWindow))
 
 #topic to write for all Events that are shown
 fbEvents = app.topic('fbEvents', value_type=GameState)
@@ -103,7 +103,7 @@ time_stamp = ''
 
 @app.agent(fbCloseToBallTopic)
 async def process(stream):
-    async for records in stream.take(max_elements_in_window, within=windows_size):
+    async for records in stream.take(max_elements_in_window, within=ballPossessionWindow):
         print('-----'+str(max_elements_in_window)+'-----')
 
         #print(len(records))
@@ -122,7 +122,7 @@ async def process(stream):
         if not len(sorted_list) == 0:
             #only create an event if the player is < 3m to the ball and is the closes for 70% of the time within the three seconds
             # # of times the player was the closest to the ball and within 3m / max of elements possible in a window -> must be bigger than the threshold
-            if float(sorted_list[-1][1])/float(max_elements_in_window) >= ball_possession_threshold:
+            if float(sorted_list[-1][1])/float(max_elements_in_window) >= ballPossessionThreshold:
                 # Topic BallPossessionChange 
                 print(sorted_list)
                                 
@@ -207,7 +207,7 @@ async def process(stream):
 #             #print(list(windowedTable.values()))
 
 #             #print('--END--')
-#     #    async for values in stream.take(max_events, within=windows_size):
+#     #    async for values in stream.take(max_events, within=ballPossessionWindow):
 #     #        print(f'RECEIVED {len(values)} with key xy')
 
 #@app.agent(fbCloseToBallTopic)
