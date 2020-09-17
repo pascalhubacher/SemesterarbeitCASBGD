@@ -55,6 +55,7 @@ ball_possession_threshold = 0.5
 
 print('windows_size', windows_size)
 print('max_events', max_elements_in_window)
+print('ddddd', BALL_POSSESSION_ID)
 
 #json data in the stream
 #key=19060518.10
@@ -145,6 +146,10 @@ async def process(stream):
 
         print('-----')
 
+@app.agent(fbEvents)
+async def process(stream2):
+    async for key2, value2 in stream2.items():
+        print(key2, value2)
 #    async for key, value in stream.items():
 #         #only work with the elements of the MATCH_ID
 #         if key.decode("utf-8").split('.')[0] == MATCH_ID:

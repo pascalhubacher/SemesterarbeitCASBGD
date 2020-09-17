@@ -11,6 +11,7 @@
 #open a new cmd prompt
 #docker exec -it semesterarbeitcasbgd_faust-1_1 bash
 #python3 GetPlayers2Json.py
+#check -> ls -> player.json exists
 #faust -A worker_fbRawGames worker -l info --without-web
 #---------------------
 #open a new cmd prompt
