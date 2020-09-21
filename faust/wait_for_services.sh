@@ -16,11 +16,11 @@ done
 >&2 echo "Schema Registry is up"
 
 >&2 echo "Wait 60 seconds to start the faust agent up"
-
-#sleep 60
+sleep 60
 
 #read the t_rawMetaPlayer topic and save the playerinfo locally as player.json
-#python3 GetPlayers2Json.py
+>&2 echo "Create player.json file out of the kafka topic 'rawMetaPlayer'"
+python3 GetPlayers2Json.py
 
 #faust worker script
 #>&2 echo "Starting faust worker listening on RawGames and send it in the background

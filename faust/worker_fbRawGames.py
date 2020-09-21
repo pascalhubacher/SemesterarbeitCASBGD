@@ -1,12 +1,6 @@
 import faust
 import time, math
 
-#GLOBALS
-ballPossessionDistance = 3
-BALL_ID = whatsTheBallId('rawMetaMatch')
-MATCH_ID = whatsTheMatchId('rawMetaMatch')
-BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
-
 def whatsTheBallId(metadataTopic):
     return('200')
 
@@ -23,6 +17,12 @@ def ballPossession(playerId, ballId, distance=3):
 
 def euclidianDistance(ball_set, player_set):
     return(math.sqrt((float(ball_set[0]) - float(player_set[0]))**2 + (float(ball_set[1]) - float(player_set[1]))**2 + (float(ball_set[2]) - float(player_set[2]))**2))
+
+#GLOBALS
+ballPossessionDistance = 3
+BALL_ID = whatsTheBallId('rawMetaMatch')
+MATCH_ID = whatsTheMatchId('rawMetaMatch')
+BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
 
 #variables
 #list of all kafka brokers

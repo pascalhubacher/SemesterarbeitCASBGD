@@ -11,7 +11,8 @@ RUN echo 'deb [check-valid-until=no] http://archive.debian.org/debian jessie-bac
     && apt-get update \
     && apt-get install -y --no-install-recommends apt-utils \
     && apt-get install dos2unix
-RUN apt-get install -y netcat && apt-get autoremove -y && apt-get install dos2unix -y && apt-get install vim -y
+RUN apt-get install -y netcat && apt-get autoremove -y && apt-get install dos2unix -y
+# && apt-get install vim -y
 
 # clone repository with data
 #RUN git clone https://github.com/pascalhubacher/SemesterarbeitCASBGD.git
