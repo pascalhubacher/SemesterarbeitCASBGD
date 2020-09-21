@@ -15,6 +15,7 @@ def whatsTheMatchId(metadataTopic):
 
 def ballPossession(playerId, ballId, distance=3):
     dist = euclidianDistance((ballId[0], ballId[1], ballId[2]),(playerId[0], playerId[1], playerId[2]))
+    #distance below 3 meters count as ball possession
     if dist < 3:
         return((True, dist))
     else:
