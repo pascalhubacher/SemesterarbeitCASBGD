@@ -48,7 +48,7 @@ number_of_players_plus_ball = 23
 #  "matchid": "19060518"
 #}
 
-#, serializer='json'
+# GameEvent Schema
 class GameEvent(faust.Record, serializer='json'):
     ts: str
     x: str

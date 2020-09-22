@@ -8,6 +8,10 @@
 #set DOCKER_HOST_IP=192.168.1.203
 #docker-compose up --build --remove-orphans
 #---------------------
+#to show the raw Messages from the simulator that come
+#docker exec -ti kafkacat sh
+#kafkacat -b kafka-1:9092 -t rawGames
+#---------------------
 #open a new cmd prompt
 #docker exec -it semesterarbeitcasbgd_faust-1_1 bash
 #check -> ls -> "player.json" exists
