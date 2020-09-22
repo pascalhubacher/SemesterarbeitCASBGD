@@ -90,10 +90,10 @@ app = faust.App('faustFbfbBallPossession', broker=kafka_brokers, topic_partition
 #fbCloseToBallTopic = app2.topic('fbBallPossession', value_type=GameEvent)
 
 #topic to listen to
-fbCloseToBallTopic = app.topic('fbBallPossession', value_type=GameEvent)
+fbBallPossessionTopic = app.topic('fbBallPossession', value_type=GameEvent)
 
-#Table to save the latest element of each player and the ball
-ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tumbling(datetime.timedelta(seconds=ballPossessionWindow), expires=datetime.timedelta(seconds=ballPossessionWindow))
+#Table to save the window elements of each player
+#ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tumbling(datetime.timedelta(seconds=ballPossessionWindow), expires=datetime.timedelta(seconds=ballPossessionWindow))
 
 #topic to write for all Events that are shown
 fbEvents = app.topic('fbEvents', value_type=GameState)
@@ -101,7 +101,7 @@ fbEvents = app.topic('fbEvents', value_type=GameState)
 #last ball time stamp
 time_stamp = ''
 
-@app.agent(fbCloseToBallTopic)
+@app.agent(fbBallPossessionTopic)
 async def process(stream):
     async for records in stream.take(max_elements_in_window, within=ballPossessionWindow):
         print('-----'+str(max_elements_in_window)+'-----')
@@ -126,13 +126,15 @@ async def process(stream):
                 # Topic BallPossessionChange 
                 print(sorted_list)
                                 
-                #set variable to global
+                #set variable to global (Match ID)
                 global BALL_POSSESSION_ID
 
-                #is there player information for the match id and player id
+                # was the last ball possession player the same as the player now?
+                # we only want to create a message if there is a new player in ball possession 
                 if not BALL_POSSESSION_ID == str(MATCH_ID)+'.'+str(sorted_list[-1][0]):
                     #last player with ball possession
                     BALL_POSSESSION_ID = str(MATCH_ID)+'.'+str(sorted_list[-1][0])
+                    #is there player information for the match id and player id
                     if getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[0]:
                         player_info = getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[1]
                         print(json.dumps(player_info), time_stamp)
