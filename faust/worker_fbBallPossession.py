@@ -82,11 +82,9 @@ class GameState(faust.Record, serializer='json'):
     eventtype: str
     playerId: int
     matchId: int
-    playerKey: str
-#BallPossessionChange (json in the description field)
-#playerId, playerName, playerAlias, objectType (0-> Ball, 1-> Home, 2->Away)
+    playerKey: str #"19060518.10"
 
-app = faust.App('faustFbfbBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
+app = faust.App('faustFbBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #app2 = faust.App('faustFbTableBallPossession3', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #fbCloseToBallTopic = app2.topic('fbBallPossession', value_type=GameEvent)
 
@@ -97,7 +95,7 @@ fbBallPossessionTopic = app.topic('fbBallPossession', value_type=GameEvent)
 #ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tumbling(datetime.timedelta(seconds=ballPossessionWindow), expires=datetime.timedelta(seconds=ballPossessionWindow))
 
 #topic to write for all Events that are shown
-fbEvents = app.topic('fbBallPossessionAggregate', value_type=GameState)
+fbBallPossessionAggregateTopic = app.topic('fbBallPossessionAggregate', value_type=GameState)
 
 #last ball time stamp
 time_stamp = ''
@@ -142,7 +140,7 @@ async def process(stream):
                         
                         #sent record to topic 'fbEvents'
                         #"<GameState: ts='2019.06.05T20:45:14.320000', eventtype='BallPossessionChange', matchid='19060518', description="
-                    await fbEvents.send(key=bytes(str(MATCH_ID), 'utf-8'), value=GameState(ts=str(time_stamp), eventtype=str('BallPossessionChange'), playerId=int(sorted_list[-1][0]), matchId=str(MATCH_ID), playerKey=str(BALL_POSSESSION_ID)))
+                    await fbBallPossessionAggregateTopic.send(key=bytes(str(MATCH_ID), 'utf-8'), value=GameState(ts=str(time_stamp), eventtype=str('BallPossessionChange'), playerId=int(sorted_list[-1][0]), matchId=str(MATCH_ID), playerKey=str(BALL_POSSESSION_ID)))
                 else:
                     print('Same player as before')
 
