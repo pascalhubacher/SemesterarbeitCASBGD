@@ -32,13 +32,20 @@ WITH (KAFKA_TOPIC='rawMetaMatch', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON')
 
 
 -- Tabelle mit Topic fbFieldPos neu erstellen
-CREATE TABLE t_fbFieldPos (
-  rowKey VARCHAR PRIMARY KEY, 
-  matchId BIGINT, 
-  pitchXmax DOUBLE, 
-  pitchYmin DOUBLE, 
-  pitchYmax DOUBLE) 
-WITH (KAFKA_TOPIC='fbFieldPos', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+CREATE TABLE t_fbFieldPos 
+WITH (KAFKA_TOPIC='fbFieldPos', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON')
+as
+select
+  matchId, 
+  STRUCT( Xmin := -(PITCHXSIZE/2), Xmax := (PITCHXSIZE/2), Ymin := -(PITCHYSIZE/2), Ymax := (PITCHYSIZE/2)) AS pitch,
+  STRUCT( Xmin := -(PITCHXSIZE/2), Xmax := 0, Ymin := -(PITCHYSIZE/2), Ymax := (PITCHYSIZE/2)) AS pitchLeft, 
+  STRUCT( Xmin := 0, Xmax := (PITCHXSIZE/2), Ymin := -(PITCHYSIZE/2), Ymax := (PITCHYSIZE/2)) AS pitchRight, 
+  STRUCT( Xmin := -(PITCHXSIZE/2), Xmax := -(PITCHXSIZE/2)+16.5, Ymin := (-20.16), Ymax := 20.16) AS penaltyBoxLeft, 
+  STRUCT( Xmin := (PITCHXSIZE/2)-16.5, Xmax := (PITCHXSIZE/2), Ymin := (-20.16), Ymax := 20.16) AS penaltyBoxRight, 
+  STRUCT( Xmin := -(PITCHXSIZE/2)-2.0, Xmax := -(PITCHXSIZE/2), Ymin := -3.66, Ymax := 3.66 ) AS goalLeft, 
+  STRUCT( Xmin := (PITCHXSIZE/2), Xmax := (PITCHXSIZE/2)+2.0, Ymin := (-3.66), Ymax := 3.66 ) AS goalRight
+FROM t_rawMetaMatch
+EMIT CHANGES;
 
 
 
@@ -102,20 +109,32 @@ INSERT INTO t_rawMetaPlayer (rowKey, matchId, sensorId, name, alias, objectType)
 
 
 CREATE STREAM s_rawGames (
-  ts VARCHAR, 
-  x VARCHAR,
-  y VARCHAR,
-  z VARCHAR,
-  id VARCHAR) 
-WITH (KAFKA_TOPIC='rawGames', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+    ts VARCHAR,
+    x DOUBLE,
+    y DOUBLE,
+    z DOUBLE,
+    id int,
+    matchId BIGINT
+  ) WITH (
+    KAFKA_TOPIC = 'rawGames',
+    PARTITIONS=1,
+    REPLICAS=1, 
+    VALUE_FORMAT='JSON'
+);
 
 CREATE STREAM s_fbBallPossession (
-  ts VARCHAR, 
-  x VARCHAR,
-  y VARCHAR,
-  z VARCHAR,
-  id VARCHAR) 
-WITH (KAFKA_TOPIC='fbBallPossession', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+    ts VARCHAR,
+    x DOUBLE,
+    y DOUBLE,
+    z DOUBLE,
+    id int,
+    matchId BIGINT
+  ) WITH (
+    KAFKA_TOPIC = 'fbBallPossession',
+    PARTITIONS=1,
+    REPLICAS=1, 
+    VALUE_FORMAT='JSON'
+);
 
 CREATE STREAM s_fbBallPossessionAggregate (
   ts VARCHAR, 
