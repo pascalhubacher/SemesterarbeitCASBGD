@@ -61,9 +61,9 @@ app = faust.App('faustFbrawGames', broker=kafka_brokers, topic_partitions=int(le
 #topic all the events of all games are sent to it
 rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 #topic to write into it if a player is close to the ball
-fbCloseToBallTopic = app.topic('fbBallPossession', value_type=GameEvent)
+fbBallPossessionTopic = app.topic('fbBallPossession', value_type=GameEvent)
 #Table to save the latest element of each player and the ball
-ballPossessionTable = app.Table('ballPossessionTable', default=GameEvent)
+fbBallPossessionTable = app.Table('fbBallPossessionTable', default=GameEvent)
 
 @app.agent(rawGameTopic)
 async def process(stream):
@@ -72,17 +72,17 @@ async def process(stream):
         if key.decode("utf-8").split('.')[0] == MATCH_ID:
             #print('--START--')
             
-            #write the element to the table 'ballPossessionTable'
-            ballPossessionTable[key] = value
+            #write the element to the table 'fbBallPossessionTable'
+            fbBallPossessionTable[key] = value
 
-            #print(ballPossessionTable.keys())
-            #print(ballPossessionTable.values())
+            #print(fbBallPossessionTable.keys())
+            #print(fbBallPossessionTable.values())
 
             if key == bytes(BALL_KEY, 'utf-8'):
-                ball = ballPossessionTable[bytes(BALL_KEY, 'utf-8')]
+                ball = fbBallPossessionTable[bytes(BALL_KEY, 'utf-8')]
                 #print(ball)
                 elements = []
-                for key_elem, value_elem in zip(ballPossessionTable.keys(), ballPossessionTable.values()):
+                for key_elem, value_elem in zip(fbBallPossessionTable.keys(), fbBallPossessionTable.values()):
                     if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (str(value_elem) == ''):
                         #print('--key--')
                         #print(key_elem)
@@ -102,8 +102,8 @@ async def process(stream):
                             best = elem
                     #print(best)
 
-                    #send record to topic 'fbCloseToBallTopic'
-                    await fbCloseToBallTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=best[1].ts, x=best[1].x, y=best[1].y, z=best[1].z, id=best[1].id, matchid=best[1].matchid))
+                    #send record to topic 'fbBallPossessionTopic'
+                    await fbBallPossessionTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=best[1].ts, x=best[1].x, y=best[1].y, z=best[1].z, id=best[1].id, matchid=best[1].matchid))
 
             #timer 3sec
             #80% ball possession -> write topic -> ball posession state
@@ -124,7 +124,7 @@ async def process(stream):
             #            #print(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())))
             #            #print(getxyzvalues(str(windowedTable[key_elem].value())))
             #            if euclidian_distance < 3:
-            #                await fbCloseToBallTopic.send(key=key_elem, value=windowedTable[key_elem].value())
+            #                await fbBallPossessionTopic.send(key=key_elem, value=windowedTable[key_elem].value())
 
             #print('----')
             # Show items present relative to time of current event in stream:
@@ -139,7 +139,7 @@ async def process(stream):
     #        print(f'RECEIVED {len(values)} with key xy')
 
 # app2 = faust.App('faustFbTableBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
-# @app2.agent(fbCloseToBallTopic)
+# @app2.agent(fbBallPossessionTopic)
 # @app2.timer(3.0)
 # async def my_periodic_task():
 #     print('THREE SECONDS PASSED')
