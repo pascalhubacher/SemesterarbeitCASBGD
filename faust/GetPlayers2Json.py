@@ -41,4 +41,4 @@ for element in data[1:]:
 
 with open(os.path.join(os.getcwd(), 'player.json'), 'w') as outfile:
     json.dump(player_json, outfile)
-    print('Sucessfully created "player.json" file.')
+    print('Successfully created "player.json" file.')
