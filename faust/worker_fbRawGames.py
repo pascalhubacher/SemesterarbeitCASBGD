@@ -103,7 +103,7 @@ async def process(stream):
                     #print(best)
 
                     #send record to topic 'fbBallPossessionTopic'
-                    await fbBallPossessionTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=str(best[1].ts), x=float(best[1].x), y=float(best[1].y), z=float(best[1].z), id=int(best[1].id), matchid=int(best[1].matchid))
+                    await fbBallPossessionTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=str(best[1].ts), x=float(best[1].x), y=float(best[1].y), z=float(best[1].z), id=int(best[1].id), matchid=int(best[1].matchid)))
 
             #timer 3sec
             #80% ball possession -> write topic -> ball posession state
@@ -150,5 +150,3 @@ async def process(stream):
 
 # if __name__ == '__main__':
 #     app.main()
-
-
