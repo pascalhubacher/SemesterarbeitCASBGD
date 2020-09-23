@@ -51,11 +51,11 @@ number_of_players_plus_ball = 23
 # GameEvent Schema
 class GameEvent(faust.Record, serializer='json'):
     ts: str
-    x: str
-    y: str
-    z: str
-    id: str
-    matchid: str
+    x: float
+    y: float
+    z: float
+    id: int
+    matchid: int
 
 app = faust.App('faustFbRawGames', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #topic all the events of all games are sent to it
@@ -103,7 +103,7 @@ async def process(stream):
                     #print(best)
 
                     #send record to topic 'fbBallPossessionTopic'
-                    await fbBallPossessionTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=best[1].ts, x=best[1].x, y=best[1].y, z=best[1].z, id=best[1].id, matchid=best[1].matchid))
+                    await fbBallPossessionTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=best[1].ts, x=float(best[1].x)), y=float(best[1].y), z=float(best[1].z), id=int(best[1].id), matchid=int(best[1].matchid))
 
             #timer 3sec
             #80% ball possession -> write topic -> ball posession state

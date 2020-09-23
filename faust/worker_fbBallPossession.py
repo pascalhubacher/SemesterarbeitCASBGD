@@ -68,13 +68,14 @@ print('max_events', max_elements_in_window)
 #}
 
 #, serializer='json'
+# GameEvent Schema
 class GameEvent(faust.Record, serializer='json'):
     ts: str
-    x: str
-    y: str
-    z: str
-    id: str
-    matchid: str
+    x: float
+    y: float
+    z: float
+    id: int
+    matchid: int
 
 #rowkey = "19060518.10"
 class GameState(faust.Record, serializer='json'):
