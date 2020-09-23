@@ -57,7 +57,7 @@ class GameEvent(faust.Record, serializer='json'):
     id: str
     matchid: str
 
-app = faust.App('faustFbrawGames', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
+app = faust.App('faustFbRawGames', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #topic all the events of all games are sent to it
 rawGameTopic = app.topic('rawGames', value_type=GameEvent)
 #topic to write into it if a player is close to the ball
