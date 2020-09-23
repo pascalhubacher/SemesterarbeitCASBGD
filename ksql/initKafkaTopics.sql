@@ -45,7 +45,7 @@ WITH (KAFKA_TOPIC='fbFieldPos', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
 -- Tabelle mit Topic rawMetaPlayer neu erstellen (Sensor-Objekte; Spieler, Ball)
 CREATE TABLE t_rawMetaPlayer (
   rowKey VARCHAR PRIMARY KEY, 
-  gameId BIGINT, 
+  matchId BIGINT, 
   sensorId INT, 
   name varchar, 
   alias varchar, 
@@ -100,6 +100,30 @@ INSERT INTO t_rawMetaPlayer (rowKey, gameId, sensorId, name, alias, objectType) 
 INSERT INTO t_rawMetaPlayer (rowKey, gameId, sensorId, name, alias, objectType) VALUES ('19060518.122', 19060518, 122 , 'Schaer' , 'B10' , 2);
 INSERT INTO t_rawMetaPlayer (rowKey, gameId, sensorId, name, alias, objectType) VALUES ('19060518.123', 19060518, 123 , 'Shaqiri' , 'B11' , 2);
 
+
+CREATE STREAM s_rawGames (
+  ts VARCHAR, 
+  x VARCHAR,
+  y VARCHAR,
+  z VARCHAR,
+  id VARCHAR) 
+WITH (KAFKA_TOPIC='rawGames', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+
+CREATE STREAM s_fbBallPossession (
+  ts VARCHAR, 
+  x VARCHAR,
+  y VARCHAR,
+  z VARCHAR,
+  id VARCHAR) 
+WITH (KAFKA_TOPIC='fbBallPossession', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+
+CREATE STREAM s_fbBallPossessionAggregate (
+  ts VARCHAR, 
+  eventtype VARCHAR,
+  playerId BIGINT,
+  matchId BIGINT,
+  playerKey VARCHAR) 
+WITH (KAFKA_TOPIC='fbBallPossessionAggregate', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
 
 
 -- Konfiguration der Tabelle ausgeben

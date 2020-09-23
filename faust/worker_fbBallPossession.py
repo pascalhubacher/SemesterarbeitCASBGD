@@ -36,14 +36,14 @@ BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
 BALL_POSSESSION_ID = str(MATCH_ID)
 
 # Open playser JSON file
-with open(os.path.join(os.getcwd(), 'player.json')) as json_file: 
-    player_data = json.load(json_file)
+#with open(os.path.join(os.getcwd(), 'player.json')) as json_file: 
+#    player_data = json.load(json_file)
 
 #variables
 #list of all kafka brokers
 #kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
 kafka_brokers = ['kafka-1:9092']
-kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
+#kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 
 ballPossessionWindow = 1 #second
 ballPossessionThreshold = 0.5
@@ -76,12 +76,13 @@ class GameEvent(faust.Record, serializer='json'):
     id: str
     matchid: str
 
-#, serializer='json'
+#rowkey = "19060518.10"
 class GameState(faust.Record, serializer='json'):
     ts: str
     eventtype: str
-    matchid: str
-    description: str
+    playerId: int
+    matchId: int
+    playerKey: str
 #BallPossessionChange (json in the description field)
 #playerId, playerName, playerAlias, objectType (0-> Ball, 1-> Home, 2->Away)
 
@@ -96,7 +97,7 @@ fbBallPossessionTopic = app.topic('fbBallPossession', value_type=GameEvent)
 #ballPossessionTable = app.Table('ballPossessionTable2', value_type=GameEvent).tumbling(datetime.timedelta(seconds=ballPossessionWindow), expires=datetime.timedelta(seconds=ballPossessionWindow))
 
 #topic to write for all Events that are shown
-fbEvents = app.topic('fbEvents', value_type=GameState)
+fbEvents = app.topic('fbBallPossessionAggregate', value_type=GameState)
 
 #last ball time stamp
 time_stamp = ''
@@ -135,13 +136,13 @@ async def process(stream):
                     #last player with ball possession
                     BALL_POSSESSION_ID = str(MATCH_ID)+'.'+str(sorted_list[-1][0])
                     #is there player information for the match id and player id
-                    if getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[0]:
-                        player_info = getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[1]
-                        print(json.dumps(player_info), time_stamp)
+                    #if getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[0]:
+                        #player_info = getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[1]
+                        #print(json.dumps(player_info), time_stamp)
                         
                         #sent record to topic 'fbEvents'
                         #"<GameState: ts='2019.06.05T20:45:14.320000', eventtype='BallPossessionChange', matchid='19060518', description="
-                        await fbEvents.send(key=bytes(str(MATCH_ID), 'utf-8'), value=GameState(ts=str(time_stamp), eventtype=str('BallPossessionChange'), matchid=str(MATCH_ID), description=str(json.dumps(player_info))))
+                    await fbEvents.send(key=bytes(str(MATCH_ID), 'utf-8'), value=GameState(ts=str(time_stamp), eventtype=str('BallPossessionChange'), playerId=int(sorted_list[-1][0]), matchId=str(MATCH_ID), playerKey=str(BALL_POSSESSION_ID)))
                 else:
                     print('Same player as before')
 

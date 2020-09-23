@@ -16,14 +16,14 @@ done
 >&2 echo "Schema Registry is up"
 
 #exectue create topic
-echo "Initializing environment (topics)"
-python3 initialize_env.py
+#echo "Initializing environment (topics)"
+#python3 initialize_env.py
 
 # execute ksql file line by line
-echo "Execute ksql commands"
-python3 ksql_execute.py
+#echo "Execute ksql commands"
+#python3 ksql_execute.py
 
-sleep 90
+#sleep 90
 
 #simulator
 #python3 simulator.py
