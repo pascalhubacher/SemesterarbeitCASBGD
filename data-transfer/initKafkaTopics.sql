@@ -11,6 +11,11 @@
 -- Query beenden:    TERMINATE <query name>;
 
 -- ---------------------------------------------
+-- Development options
+-- Set 'auto.offset.reset' = 'earliest';
+-- unset 'auto.offset.reset';
+
+-- ---------------------------------------------
 -- MetaDaten
 
 -- Tabellen, Streams und Topics löschen
@@ -133,6 +138,37 @@ CREATE STREAM s_fbBallPossessionAggregate (
   matchId BIGINT,
   playerKey VARCHAR) 
 WITH (KAFKA_TOPIC='fbBallPossessionAggregate', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+
+
+
+
+create stream s_fbBallPossessionEvent
+WITH (
+    kafka_topic = 'fbBallPossessionEvent',
+    PARTITIONS=1, 
+    REPLICAS=1,
+    VALUE_FORMAT='JSON'
+)
+as
+select
+  bp.ts as ts, 
+  bp.eventtype as eventtype,
+  bp.playerId as playerId,
+  bp.matchId as matchId,
+  bp.playerKey as playerKey,
+  p.name as name,
+  p.alias as alias,
+  p.objectType as objectType
+from s_fbBallPossessionAggregate bp
+inner join t_rawMetaPlayer p on p.rowkey = bp.playerKey
+partition by cast(p.matchid as varchar)
+EMIT CHANGES;
+
+--TERMINATE  CSAS_S_FBBALLPOSSESSIONEVENT_21;
+--DROP STREAM IF EXISTS s_fbBallPossessionEvent delete topic;
+
+
+
 
 
 -- Konfiguration der Tabelle ausgeben

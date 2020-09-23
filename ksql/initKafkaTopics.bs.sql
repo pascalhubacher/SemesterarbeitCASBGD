@@ -247,17 +247,36 @@ inner join t_rawMetaPlayer p on g.rowkey = p.rowkey
 inner join t_fbFieldPos pos on cast(g.matchId as varchar) = pos.ROWKEY
 where p.objecttype = 0 EMIT CHANGES;
 
+create stream s_fbBallPossessionEvent
+WITH (
+    kafka_topic = 'fbBallPossessionEvent',
+    PARTITIONS=1, 
+    REPLICAS=1,
+    VALUE_FORMAT='JSON'
+)
+as
+select
+  bp.ts as ts, 
+  bp.eventtype as eventtype,
+  bp.playerId as playerId,
+  bp.matchId as matchId,
+  bp.playerKey as playerKey,
+  p.name as name,
+  p.alias as alias,
+  p.objectType as objectType
+from s_fbBallPossessionAggregate bp
+inner join t_rawMetaPlayer p on p.rowkey = bp.playerKey
+partition by cast(p.matchid as varchar)
+EMIT CHANGES;
 
-
-
-
-
+--TERMINATE  CSAS_S_FBBALLPOSSESSIONEVENT_21;
+--DROP STREAM IF EXISTS s_fbBallPossessionEvent delete topic;
 
 DROP Stream IF EXISTS s1 delete topic;
 DROP Stream IF EXISTS s2 delete topic;
 
 
-TERMINATE CSAS_S2_11;
+TERMINATE CSAS_S_FBBALLPOSSESSIONEVENT_5;
 TERMINATE CTAS_T_FBFIELDPOS_49;
 
 CREATE STREAM s1 (
