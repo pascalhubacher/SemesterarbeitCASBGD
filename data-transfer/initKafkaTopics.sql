@@ -64,16 +64,6 @@ WITH (KAFKA_TOPIC='rawMetaPlayer', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON'
 --------------------
 -- Daten einfügen
 
--- Daten in Topic fbFieldPos schreiben
-CREATE TABLE t_calcBasePos
-  WITH (kafka_topic='fbFieldPos',
-        value_format='JSON', 
-        partitions=1)
-AS 
-SELECT matchId, -(PITCHXSIZE/2) AS pitchXmin, (PITCHXSIZE/2) AS pitchXmax, 
--(PITCHYSIZE/2) AS pitchYmin, (PITCHYSIZE/2) AS pitchYmax FROM t_rawMetaMatch
-EMIT CHANGES;
-
 
 
 

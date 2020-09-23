@@ -80,7 +80,7 @@ EMIT CHANGES;
 --Describe t_fbFieldpos;
 --print 'fbFieldPos';
 --select * from t_fbFieldPos emit changes;
---TERMINATE CTAS_T_FBFIELDPOS_49;
+--TERMINATE CTAS_T_CALCBASEPOS_0;
 DROP TABLE IF EXISTS v_fbFieldPos delete topic;
 
 select max(matchId) matchId, max(pitch) pitch from v_fbFieldPos
@@ -244,8 +244,8 @@ select g.ts, g.x, g.y, g.id, g.matchid as matchid, p.name,
   CASE WHEN x > goalRight->Xmin AND x < goalRight->Xmax AND y > goalRight->Ymin AND y < goalRight->Ymax THEN 1 ELSE 0 END AS isGoalRight
 from s_rawGames g
 inner join t_rawMetaPlayer p on g.rowkey = p.rowkey
-inner join t_fbFieldPos pos on g.matchId = pos.ROWKEY
-where p.objecttype = 0 EMIT CHANGES limit 10;
+inner join t_fbFieldPos pos on cast(g.matchId as varchar) = pos.ROWKEY
+where p.objecttype = 0 EMIT CHANGES;
 
 
 
