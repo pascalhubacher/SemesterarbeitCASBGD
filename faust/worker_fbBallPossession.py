@@ -35,23 +35,18 @@ BALL_KEY = str(MATCH_ID)+'.'+str(BALL_ID)
 #who had the Ball in the last event
 BALL_POSSESSION_ID = str(MATCH_ID)
 
-# Open playser JSON file
-#with open(os.path.join(os.getcwd(), 'player.json')) as json_file: 
-#    player_data = json.load(json_file)
-
 #variables
 #list of all kafka brokers
 #kafka_brokers = ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094']
 kafka_brokers = ['kafka-1:9092']
-#kafka_topics = ['rawGames', 'fbBallPossession', 'rawMetaMatch']
 
 ballPossessionWindow = 1 #second
 ballPossessionThreshold = 0.5
 
 events_per_second = 25
 number_of_players_plus_ball = 23
-#max_events = ballPossessionWindow * events_per_second * number_of_players_plus_ball
-max_elements_in_window = ballPossessionWindow * events_per_second
+max_elements_in_window = ballPossessionWindow * events_per_second * number_of_players_plus_ball
+#max_elements_in_window = ballPossessionWindow * events_per_second
 
 print('ballPossessionWindow', ballPossessionWindow)
 print('max_events', max_elements_in_window)
@@ -67,7 +62,6 @@ print('max_events', max_elements_in_window)
 #  "matchid": "19060518"
 #}
 
-#, serializer='json'
 # GameEvent Schema
 class GameEvent(faust.Record, serializer='json'):
     ts: str
@@ -120,13 +114,13 @@ async def process(stream):
         sorted_list = sorted(counter_dict.items(), key=lambda kv: kv[1])
 
         if not len(sorted_list) == 0:
-            #only create an event if the player is < 3m to the ball and is the closes for 70% of the time within the three seconds
+            #only create an event if the player is < 3m to the ball and is the closes for 50% of the time within the three seconds
             # # of times the player was the closest to the ball and within 3m / max of elements possible in a window -> must be bigger than the threshold
             if float(sorted_list[-1][1])/float(max_elements_in_window) >= ballPossessionThreshold:
                 # Topic BallPossessionChange 
                 print(sorted_list)
                                 
-                #set variable to global (Match ID)
+                #set variable to global
                 global BALL_POSSESSION_ID
 
                 # was the last ball possession player the same as the player now?
@@ -134,91 +128,14 @@ async def process(stream):
                 if not BALL_POSSESSION_ID == str(MATCH_ID)+'.'+str(sorted_list[-1][0]):
                     #last player with ball possession
                     BALL_POSSESSION_ID = str(MATCH_ID)+'.'+str(sorted_list[-1][0])
-                    #is there player information for the match id and player id
-                    #if getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[0]:
-                        #player_info = getListOfPropertiesOfItem(player_data, str(MATCH_ID)+'.'+str(sorted_list[-1][0]))[1]
-                        #print(json.dumps(player_info), time_stamp)
-                        
-                        #sent record to topic 'fbEvents'
-                        #"<GameState: ts='2019.06.05T20:45:14.320000', eventtype='BallPossessionChange', matchid='19060518', description="
+                    
+                    #"<GameState: ts='2019.06.05T20:45:14.320000', eventtype='BallPossessionChange', matchid='19060518', description="
+                    #sent record to topic 'fbBallPossessionAggregate'
                     await fbBallPossessionAggregateTopic.send(key=bytes(str(MATCH_ID), 'utf-8'), value=GameState(ts=str(time_stamp), eventtype=str('BallPossessionChange'), playerId=int(sorted_list[-1][0]), matchId=int(MATCH_ID), playerKey=str(BALL_POSSESSION_ID)))
                 else:
                     print('Same player as before')
 
         print('-----')
-
-#    async for key, value in stream.items():
-#         #only work with the elements of the MATCH_ID
-#         if key.decode("utf-8").split('.')[0] == MATCH_ID:
-#             #print('--START--')
-            
-#             #write the element to the table 'ballPossessionTable'
-#             ballPossessionTable[key] = value
-
-#             #print(ballPossessionTable.keys())
-#             #print(ballPossessionTable.values())
-
-#             if key == bytes(BALL_KEY, 'utf-8'):
-#                 ball = ballPossessionTable[bytes(BALL_KEY, 'utf-8')]
-#                 elements = []
-#                 for key_elem, value_elem in zip(ballPossessionTable.keys(), ballPossessionTable.values()):
-#                     if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (str(value_elem) == ''):
-#                         dist = ballPossession((value_elem.x, value_elem.y, value_elem.z), (ball.x, ball.y, ball.z))
-#                         if dist[0]:
-#                             #create list element in a set
-#                             elements.append((key_elem, value_elem, dist[1]))
-
-#                 if not len(elements) == 0:
-#                     print(elements)
-#                     #write to 'fbBallPossession' topic
-#                     # if more than 1 player is close to the ball then the closest has ball possession
-#                     best = elements[0]
-#                     for elem in elements:
-#                         if elem[2] < best[2]:
-#                             best = elem
-#                     print(best)
-#                     await fbCloseToBallTopic.send(key=best[0], value=best[1])
-
-#             #timer 3sec
-#             #80% ball possession -> write topic -> ball posession state
-
-
-
-#             ##if the ball value is in the table
-#             #value = str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())
-#             #if not value == '':
-#             #    print('BALL - '+str(bytes(BALL_KEY, 'utf-8'))+' - '+str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))
-#             #    #print('BALL - '+str(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))))
-
-#             #    for key_elem in list(windowedTable.keys()):
-#             #        #do not take the ball data
-#             #        if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (windowedTable[key_elem].value() == ''):
-#             #            euclidian_distance = euclidianDistance(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())),getxyzvalues(str(windowedTable[key_elem].value())))
-#             #            print(str(key_elem)+' - '+str(windowedTable[key_elem].value())+' - '+str(euclidian_distance))
-#             #            #print(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())))
-#             #            #print(getxyzvalues(str(windowedTable[key_elem].value())))
-#             #            if euclidian_distance < 3:
-#             #                await fbCloseToBallTopic.send(key=key_elem, value=windowedTable[key_elem].value())
-
-#             #print('----')
-#             # Show items present relative to time of current event in stream:
-#             #print(list(windowedTable.items()))
-
-#             #print('----')
-#             # Show values present relative to time of current event in stream:
-#             #print(list(windowedTable.values()))
-
-#             #print('--END--')
-#     #    async for values in stream.take(max_events, within=ballPossessionWindow):
-#     #        print(f'RECEIVED {len(values)} with key xy')
-
-#@app.agent(fbCloseToBallTopic)
-# @app.timer(3.0)
-# async def my_periodic_task():
-#     print('THREE SECONDS PASSED')
-    # async def process(stream):
-    #     async for key, value in stream.items():
-    #         print(value)
 
 #if __name__ == '__main__':
 #    app.main()

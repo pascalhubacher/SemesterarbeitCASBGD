@@ -105,48 +105,5 @@ async def process(stream):
                     #send record to topic 'fbBallPossessionTopic'
                     await fbBallPossessionTopic.send(key=bytes(str(best[0]), 'utf-8'), value=GameEvent(ts=str(best[1].ts), x=float(best[1].x), y=float(best[1].y), z=float(best[1].z), id=int(best[1].id), matchid=int(best[1].matchid)))
 
-            #timer 3sec
-            #80% ball possession -> write topic -> ball posession state
-
-
-
-            ##if the ball value is in the table
-            #value = str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())
-            #if not value == '':
-            #    print('BALL - '+str(bytes(BALL_KEY, 'utf-8'))+' - '+str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))
-            #    #print('BALL - '+str(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value()))))
-
-            #    for key_elem in list(windowedTable.keys()):
-            #        #do not take the ball data
-            #        if not (key_elem == bytes(BALL_KEY, 'utf-8')) and not (windowedTable[key_elem].value() == ''):
-            #            euclidian_distance = euclidianDistance(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())),getxyzvalues(str(windowedTable[key_elem].value())))
-            #            print(str(key_elem)+' - '+str(windowedTable[key_elem].value())+' - '+str(euclidian_distance))
-            #            #print(getxyzvalues(str(windowedTable[bytes(BALL_KEY, 'utf-8')].value())))
-            #            #print(getxyzvalues(str(windowedTable[key_elem].value())))
-            #            if euclidian_distance < 3:
-            #                await fbBallPossessionTopic.send(key=key_elem, value=windowedTable[key_elem].value())
-
-            #print('----')
-            # Show items present relative to time of current event in stream:
-            #print(list(windowedTable.items()))
-
-            #print('----')
-            # Show values present relative to time of current event in stream:
-            #print(list(windowedTable.values()))
-
-            #print('--END--')
-    #    async for values in stream.take(max_events, within=windows_size):
-    #        print(f'RECEIVED {len(values)} with key xy')
-
-# app2 = faust.App('faustFbTableBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
-# @app2.agent(fbBallPossessionTopic)
-# @app2.timer(3.0)
-# async def my_periodic_task():
-#     print('THREE SECONDS PASSED')
-#     # async def process2(stream2):
-#     # #async for key, value in stream.items():
-#     #     async for elements in stream2.take(100, within=3.0):
-#     #         print(elements)
-
 # if __name__ == '__main__':
 #     app.main()
