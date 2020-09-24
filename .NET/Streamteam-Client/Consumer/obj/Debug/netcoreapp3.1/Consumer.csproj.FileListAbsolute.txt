@@ -1,0 +1,60 @@
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.exe
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.csprojAssemblyReference.cache
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.AssemblyInfoInputs.cache
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.AssemblyInfo.cs
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.deps.json
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.runtimeconfig.json
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.runtimeconfig.dev.json
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.pdb
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Confluent.Kafka.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\alpine-librdkafka.so
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\centos7-librdkafka.so
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\debian9-librdkafka.so
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\librdkafka.so
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\osx-x64\native\librdkafka.dylib
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\librdkafka.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\librdkafkacpp.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\libzstd.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\msvcp120.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\msvcr120.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\zlib.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\librdkafka.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\librdkafkacpp.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\libzstd.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\msvcp120.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\msvcr120.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\zlib.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.csproj.CopyComplete
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.dll
+\\Mac\Home\Documents\_SharedSource\Streamteam-Client\src\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.pdb
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.exe
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.deps.json
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.runtimeconfig.json
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.runtimeconfig.dev.json
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Consumer.pdb
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\Confluent.Kafka.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\alpine-librdkafka.so
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\centos7-librdkafka.so
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\debian9-librdkafka.so
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\librdkafka.so
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\osx-x64\native\librdkafka.dylib
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\librdkafka.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\librdkafkacpp.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\libzstd.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\msvcp120.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\msvcr120.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\zlib.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\librdkafka.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\librdkafkacpp.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\libzstd.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\msvcp120.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\msvcr120.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\zlib.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.csprojAssemblyReference.cache
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.AssemblyInfoInputs.cache
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.AssemblyInfo.cs
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.csproj.CopyComplete
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.dll
+C:\Data\Berner Fachhochschule\CAS BGD\Semesterarbeit\.NET\Streamteam-Client\Consumer\obj\Debug\netcoreapp3.1\Consumer.pdb
