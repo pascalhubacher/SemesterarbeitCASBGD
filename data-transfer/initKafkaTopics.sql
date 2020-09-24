@@ -117,6 +117,7 @@ CREATE STREAM s_rawGames (
     VALUE_FORMAT='JSON'
 );
 
+-- Streams zur Ermittlung des Ballbesitz
 CREATE STREAM s_fbBallPossession (
     ts VARCHAR,
     x DOUBLE,
@@ -138,8 +139,6 @@ CREATE STREAM s_fbBallPossessionAggregate (
   matchId BIGINT,
   playerKey VARCHAR) 
 WITH (KAFKA_TOPIC='fbBallPossessionAggregate', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
-
-
 
 
 create stream s_fbBallPossessionEvent
@@ -168,6 +167,28 @@ EMIT CHANGES;
 --DROP STREAM IF EXISTS s_fbBallPossessionEvent delete topic;
 
 
+-- Stream zur Ermittlung in welcher Zone des Spielfeldes sich der Ball befindet
+create stream s_fbBallInZone
+WITH (
+    kafka_topic = 'fbBallInZone',
+    PARTITIONS=1, 
+    REPLICAS=1,
+    VALUE_FORMAT='JSON'
+)
+as
+select g.ts, g.x, g.y, g.id, g.matchid as matchid, p.name, 
+  CASE WHEN x > pitch->Xmin AND x < pitch->Xmax AND y > pitch->Ymin AND y < pitch->Ymax THEN 1 ELSE 0 END AS isOnPitch,
+  CASE WHEN x < pitchLeft->Xmax THEN 1 ELSE 0 END AS isPitchLeft,
+  CASE WHEN x > penaltyBoxLeft->Xmin AND x < penaltyBoxLeft->Xmax AND y > penaltyBoxLeft->Ymin AND y < penaltyBoxLeft->Ymax THEN 1 ELSE 0 END AS isPenaltyBoxLeft,
+  CASE WHEN x > penaltyBoxRight->Xmin AND x < penaltyBoxRight->Xmax AND y > penaltyBoxRight->Ymin AND y < penaltyBoxRight->Ymax THEN 1 ELSE 0 END AS isPenaltyBoxRight,
+  CASE WHEN x > goalLeft->Xmin AND x < goalLeft->Xmax AND y > goalLeft->Ymin AND y < goalLeft->Ymax THEN 1 ELSE 0 END AS isGoalLeft,
+  CASE WHEN x > goalRight->Xmin AND x < goalRight->Xmax AND y > goalRight->Ymin AND y < goalRight->Ymax THEN 1 ELSE 0 END AS isGoalRight
+from s_rawGames g
+inner join t_rawMetaPlayer p on g.rowkey = p.rowkey
+inner join t_fbFieldPos pos on cast(g.matchId as varchar) = pos.ROWKEY
+where p.objecttype = 0 
+partition by cast(g.matchid as varchar)
+EMIT CHANGES;
 
 
 
