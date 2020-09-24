@@ -1,15 +1,6 @@
 import faust
 import json
 
-#GameEvent Schema
-class GameEvent(faust.Record, serializer='json'):
-    ts: str
-    x: float
-    y: float
-    z: float
-    id: int
-    matchid: int
-
 #rowkey = "19060518.10"
 class GameState(faust.Record, serializer='json'):
     ts: str
@@ -17,6 +8,7 @@ class GameState(faust.Record, serializer='json'):
     playerId: int
     matchId: int
     playerKey: str #"19060518.10"
+    eventState: int
 
 #Global Variables
 #kafka brokers
@@ -27,13 +19,13 @@ events_per_second = 25
 #the topic "fbBallPossession get at max every 40ms one entry"
 max_elements_in_window = ballPossessionWindow * events_per_second
 
-#list of pitch checks
+#initial dict of pitch checks
 #ISONPITCH, ISPITCHLEFT, ISPENALTYBOXLEFT, ISPENALTYBOXRIGHT, ISGOALLEFT, ISGOALRIGHT
 PITCH_DICT = {}
 PITCH_DICT['ISONPITCH'] = {}
 PITCH_DICT['ISONPITCH']['value'] = 0
 PITCH_DICT['ISPITCHLEFT'] = {}
-PITCH_DICT['ISPITCHLEFT']['value'] = 0
+PITCH_DICT['ISPITCHLEFT']['value'] = -1
 PITCH_DICT['ISPENALTYBOXLEFT'] = {}
 PITCH_DICT['ISPENALTYBOXLEFT']['value'] = 0
 PITCH_DICT['ISPENALTYBOXRIGHT'] = {}
@@ -66,7 +58,7 @@ fbBallInZoneTopic = app.topic('fbBallInZone')
 #}
 
 #destination topic
-fbBallInZoneEventTopic = app.topic('fbBallInZoneEvent', value_type=GameEvent)
+fbBallInZoneEventTopic = app.topic('fbBallInZoneEvent', value_type=GameState)
 
 # loop over the stream
 @app.agent(fbBallInZoneTopic)
@@ -80,15 +72,15 @@ async def process(stream):
         #print(PITCH_DICT)
 
         #ISONPITCH, ISPITCHLEFT, ISPENALTYBOXLEFT, ISPENALTYBOXRIGHT, ISGOALLEFT, ISGOALRIGHT
-        for key, elem in PITCH_DICT.items():
+        for dict_key, dict_elem in PITCH_DICT.items():
             
-            if not str(value[key]) == str(PITCH_DICT[key]['value']):
+            if not str(value[dict_key]) == str(PITCH_DICT[dict_key]['value']):
                 #print(str(key)+'---'+str(value[key]))
                 #print(str(key)+'---'+str(PITCH_DICT[key]['value']))    
-                PITCH_DICT[key]['value'] = str(value[key])
+                PITCH_DICT[dict_key]['value'] = str(value[dict_key])
                 #print(GameState(ts=str(value['TS']), eventtype=str(key)+'.'+str(value[key]), playerId=int(value['ID']), matchId=int(value['MATCHID']), playerKey=str(value['MATCHID'])+'.'+str(value['ID'])))
                 #send record to topic 'fbPitch'
-                await fbBallInZoneEventTopic.send(key=bytes(str(value['MATCHID']), 'utf-8'), value=GameState(ts=str(value['TS']), eventtype=str(key)+'.'+str(value[key]), playerId=int(value['ID']), matchId=int(value['MATCHID']), playerKey=str(value['MATCHID'])+'.'+str(value['ID'])))
+                await fbBallInZoneEventTopic.send(key=bytes(str(value['MATCHID']), 'utf-8'), value=GameState(ts=str(value['TS']), eventtype=str(dict_key), eventState=int(value[dict_key]), playerId=int(value['ID']), matchId=int(value['MATCHID']), playerKey=str(value['MATCHID'])+'.'+str(value['ID'])))
         
 #if __name__ == '__main__':
 #    app.main()
