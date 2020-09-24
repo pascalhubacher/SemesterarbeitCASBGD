@@ -45,8 +45,8 @@ ballPossessionThreshold = 0.5
 
 events_per_second = 25
 number_of_players_plus_ball = 23
-max_elements_in_window = ballPossessionWindow * events_per_second * number_of_players_plus_ball
-#max_elements_in_window = ballPossessionWindow * events_per_second
+#the topic "fbBallPossession get at max every 40ms one entry"
+max_elements_in_window = ballPossessionWindow * events_per_second
 
 print('ballPossessionWindow', ballPossessionWindow)
 print('max_events', max_elements_in_window)

@@ -24,8 +24,6 @@
 --DROP TABLE IF EXISTS t_rawMetaPlayer delete topic;
 --DROP TABLE IF EXISTS t_fbFieldPos delete topic;
 
-
-
 -- Tabelle mit Topic rawMetaMatch neu erstellen
 CREATE TABLE t_rawMetaMatch (
   rowKey VARCHAR PRIMARY KEY, 
@@ -33,8 +31,6 @@ CREATE TABLE t_rawMetaMatch (
   pitchXSize DOUBLE, 
   pitchYSize DOUBLE) 
 WITH (KAFKA_TOPIC='rawMetaMatch', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
-
-
 
 -- Tabelle mit Topic fbFieldPos neu erstellen
 CREATE TABLE t_fbFieldPos 
@@ -52,8 +48,6 @@ select
 FROM t_rawMetaMatch
 EMIT CHANGES;
 
-
-
 -- Tabelle mit Topic rawMetaPlayer neu erstellen (Sensor-Objekte; Spieler, Ball)
 CREATE TABLE t_rawMetaPlayer (
   rowKey VARCHAR PRIMARY KEY, 
@@ -64,13 +58,8 @@ CREATE TABLE t_rawMetaPlayer (
   objectType int) -- 0=Ball; 1=Player Home Team; 2=Player Away Team 
 WITH (KAFKA_TOPIC='rawMetaPlayer', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
 
-
-
 --------------------
 -- Daten einfügen
-
-
-
 
 -- Spieldaten in Topic rawMetaMatch einfügen
 INSERT INTO t_rawMetaMatch (rowKey, matchId, pitchXSize , pitchYSize ) VALUES ('19060518', 19060518, 105.0, 68.0);
@@ -190,7 +179,13 @@ where p.objecttype = 0
 partition by cast(g.matchid as varchar)
 EMIT CHANGES;
 
-
+CREATE STREAM s_fbBallInZoneEvent (
+  ts VARCHAR, 
+  eventtype VARCHAR,
+  playerId INT,
+  matchId BIGINT,
+  playerKey VARCHAR) 
+WITH (KAFKA_TOPIC='fbBallInZoneEvent', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
 
 -- Konfiguration der Tabelle ausgeben
 --DESCRIBE EXTENDED t_rawMetaMatch;
