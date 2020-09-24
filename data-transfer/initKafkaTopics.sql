@@ -184,7 +184,9 @@ CREATE STREAM s_fbBallInZoneEvent (
   eventtype VARCHAR,
   playerId INT,
   matchId BIGINT,
-  playerKey VARCHAR) 
+  playerKey VARCHAR,
+  eventState int
+) 
 WITH (KAFKA_TOPIC='fbBallInZoneEvent', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
 
 -- Konfiguration der Tabelle ausgeben
