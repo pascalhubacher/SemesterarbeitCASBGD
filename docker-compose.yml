@@ -12,6 +12,10 @@
 #docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
 #RUN SCRIPT '/data-transfer/initKafkaTopics.sql'
 #---------------------
+#open browser
+#AKHQ - Kafka Environment
+#http://localhost:28107/docker-kafka-server/topic
+#---------------------
 #to show the raw Messages from the simulator that come
 #docker exec -ti kafkacat sh
 #kafkacat -b kafka-1:9092 -t rawGames
