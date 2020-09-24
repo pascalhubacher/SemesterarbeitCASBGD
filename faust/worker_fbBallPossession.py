@@ -79,6 +79,17 @@ class GameState(faust.Record, serializer='json'):
     matchId: int
     playerKey: str #"19060518.10"
 
+#{
+#  "TS": "2019.06.05T20:46:07.200000",
+#  "EVENTTYPE": "BallPossessionChange",
+#  "PLAYERID": 114,
+#  "MATCHID": 19060518,
+#  "PLAYERKEY": "19060518.114",
+#  "NAME": "Zuber",
+#  "ALIAS": "B8",
+#  "OBJECTTYPE": 2
+#}
+
 app = faust.App('faustFbBallPossession', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #app2 = faust.App('faustFbTableBallPossession3', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #fbCloseToBallTopic = app2.topic('fbBallPossession', value_type=GameEvent)

@@ -68,17 +68,6 @@ fbBallInZoneTopic = app.topic('fbBallInZone')
 #destination topic
 fbBallInZoneEventTopic = app.topic('fbBallInZoneEvent', value_type=GameEvent)
 
-#{
-#  "TS": "2019.06.05T20:46:07.200000",
-#  "EVENTTYPE": "BallPossessionChange",
-#  "PLAYERID": 114,
-#  "MATCHID": 19060518,
-#  "PLAYERKEY": "19060518.114",
-#  "NAME": "Zuber",
-#  "ALIAS": "B8",
-#  "OBJECTTYPE": 2
-#}
-
 # loop over the stream
 @app.agent(fbBallInZoneTopic)
 async def process(stream):
