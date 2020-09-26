@@ -22,9 +22,11 @@
 #---------------------
 #open a new cmd prompt
 #docker exec -it semesterarbeitcasbgd_faust-1_1 bash
+#start process and send it to the background
 #faust -A worker_fbRawGames worker -l info --without-web &
 #faust -A worker_fbBallPossession worker -l info --without-web &
 #faust -A worker_fbBallInZone worker -l info --without-web &
+#or start the faust process each in a separate cmd prompt without ampersand "&"
 #---------------------
 #open a new cmd prompt
 #docker exec -it semesterarbeitcasbgd_simulator-1_1 bash
