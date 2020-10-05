@@ -1,5 +1,6 @@
 import faust
-import time, math
+import math, time
+from datetime import datetime, timedelta 
 
 def whatsTheBallId(metadataTopic):
     return('200')
@@ -15,8 +16,43 @@ def ballPossession(playerId, ballId, distance=3):
     else:
         return(False, -1)
 
-def euclidianDistance(ball_set, player_set):
-    return(math.sqrt((float(ball_set[0]) - float(player_set[0]))**2 + (float(ball_set[1]) - float(player_set[1]))**2 + (float(ball_set[2]) - float(player_set[2]))**2))
+# calculate the euclidian distance between two points in a 3 dimensional vector space
+def euclidianDistance(point1, point2):
+    return(math.sqrt((float(point1[0]) - float(point2[0]))**2 + (float(point1[1]) - float(point2[1]))**2 + (float(point1[2]) - float(point2[2]))**2))
+
+#calculates the delta of x,y,z and the timedifference in microseconds
+def calcDeltaDistance(pointNew, pointOld):
+    #point1 and 2 must be formatted as a set like this (x, y, z)
+    #x, y, z float
+    
+    # xNew - xOld
+    # yNew - yOld
+    # zNew - zOld
+    return((float(pointNew[0])-float(pointOld[0]), float(pointNew[1])-float(pointOld[1]), float(pointNew[2])-float(pointOld[2])))
+
+#calculates the time delta in microseconds
+def calcDeltaTime(timestampNew, timestampOld):
+    #timestamps must be formatted as ISO8601 string Timestamp
+    # ts -> deltatime in microseconds
+    return((datetime.strptime(str(timestampNew), '%Y.%m.%dT%H:%M:%S.%f')-datetime.strptime(str(timestampOld), '%Y.%m.%dT%H:%M:%S.%f')).microseconds)
+
+#calculates the velocity -> math: velocity = delta distance / delta time (linear velocity)
+def calcVelocity(pointNew, pointOld):
+    #point1 and 2 must be formatted as a set like this (x, y, z, ts)
+    timeDelta = calcDeltaTime(pointNew[3],pointOld[3])
+    #timedelta must be bigger than 0
+    if float(timeDelta) > 0:
+        return(euclidianDistance((pointNew[0], pointNew[1], pointNew[2]), (pointOld[0], pointOld[1], pointOld[2]))/timeDelta/1000/1000)
+    else:
+        return('NaN')
+
+#calculates the acceleration -> math: acceleration = delta velocity / delta time (linear acceleration)
+def calcAcceleration(advancedInfoNew, advancedInfoOld):
+    #point1 and 2 must be formatted as a set like this 
+    #ts [str], velocity [float], acceleration[float], distance[str], directionVector[set], id[int], matchid[int])
+
+    #returns float [m/s^2]
+    return((advancedInfoNew.velocity - advancedInfoOld.velocity) / calcDeltaTime(advancedInfoNew.ts, advancedInfoOld.ts))
 
 #GLOBALS
 ballPossessionDistance = 3
@@ -57,11 +93,29 @@ class GameEvent(faust.Record, serializer='json'):
     id: int
     matchid: int
 
+# GameEvent Schema
+class AdvancedInfo(faust.Record, serializer='json'):
+    ts: str
+    velocity: float #[m/s]
+    acceleration: float #[m/s^2]
+    distance: float #[m]
+    directionVector: str #(x, y, z)
+    id: int
+    matchid: int
+
 app = faust.App('faustFbRawGames', broker=kafka_brokers, topic_partitions=int(len(kafka_brokers)), value_serializer='raw')
 #topic all the events of all games are sent to it
 rawGameTopic = app.topic('rawGames', value_type=GameEvent)
+
 #topic to write into it if a player is close to the ball
 fbBallPossessionTopic = app.topic('fbBallPossession', value_type=GameEvent)
+
+#topic to write more advanced information about an element (need two elements to calculate them)
+fbAdvancedInfosTopic = app.topic('fbAdvancedInfos', value_type=AdvancedInfo)
+
+#Table to save the latest element of each player and the ball
+fbAdvancedInfosTable = app.Table('fbAdvancedInfosTable', default=AdvancedInfo)
+
 #Table to save the latest element of each player and the ball
 fbBallPossessionTable = app.Table('fbBallPossessionTable', default=GameEvent)
 
@@ -72,12 +126,43 @@ async def process(stream):
         if key.decode("utf-8").split('.')[0] == MATCH_ID:
             #print('--START--')
             
+            #only calculate the advanced parameters if an existing value is in the table
+            if key in fbBallPossessionTable:
+                pointOld = (fbBallPossessionTable[key].x, fbBallPossessionTable[key].y, fbBallPossessionTable[key].z, fbBallPossessionTable[key].ts)
+                pointNew = (value.x, value.y, value.z, value.ts)
+
+                #calculates the delta of all elements in the set (x,y,z,ts[us])
+                delta_vectorNew = calcDeltaDistance(pointNew, pointOld)  
+                #print(pointNew, pointOld)
+                velocityNew = calcVelocity(pointNew, pointOld)           
+
+                if key in fbAdvancedInfosTable:
+                    #acceleration can be calculated as an earlier velocity (delta velocity needed) exists
+                    advancedInfoOld = fbAdvancedInfosTable[key]
+                    advancedInfoNew = AdvancedInfo(ts=str(value.ts), velocity=velocityNew, acceleration=-1, distance=euclidianDistance(pointNew, pointOld), directionVector=delta_vectorNew, id=value.id, matchid=value.matchid)
+                    accelerationNew = calcAcceleration(advancedInfoNew, advancedInfoOld)
+                    
+                    #write new element to the table
+                    fbAdvancedInfosTable[key] = AdvancedInfo(ts=value.ts, velocity=velocityNew, acceleration=accelerationNew, distance=euclidianDistance(pointNew, pointOld), directionVector=delta_vectorNew, id=value.id, matchid=value.matchid)
+                    
+                    #write element to topic fbAdvancedInfos
+                    await fbAdvancedInfosTopic.send(key=key, value=AdvancedInfo(ts=str(value.ts), velocity=velocityNew, acceleration=accelerationNew, distance=euclidianDistance(pointNew, pointOld), directionVector=delta_vectorNew, id=value.id, matchid=value.matchid))
+
+
+                else:
+                    #write new element to the table
+                    #if no accelleration can be calculated -1 is used
+                    fbAdvancedInfosTable[key] = AdvancedInfo(ts=str(value.ts), velocity=velocityNew, acceleration=-1, distance=euclidianDistance(pointNew, pointOld), directionVector=delta_vectorNew, id=value.id, matchid=value.matchid)
+
+                
+
             #write the element to the table 'fbBallPossessionTable'
             fbBallPossessionTable[key] = value
 
             #print(fbBallPossessionTable.keys())
             #print(fbBallPossessionTable.values())
 
+            #if ball key
             if key == bytes(BALL_KEY, 'utf-8'):
                 ball = fbBallPossessionTable[bytes(BALL_KEY, 'utf-8')]
                 #print(ball)
