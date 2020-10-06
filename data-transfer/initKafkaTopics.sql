@@ -189,6 +189,18 @@ CREATE STREAM s_fbBallInZoneEvent (
 ) 
 WITH (KAFKA_TOPIC='fbBallInZoneEvent', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
 
+-- Advanced Infos stream
+CREATE STREAM s_fbAdvancedInfos (
+  ts VARCHAR, 
+  velocity DOUBLE,
+  acceleration DOUBLE,
+  distance DOUBLE,
+  directionVector VARCHAR,
+  id int,
+  matchId BIGINT
+) 
+WITH (KAFKA_TOPIC='fbAdvancedInfos', PARTITIONS=1, REPLICAS=1, VALUE_FORMAT='JSON');
+
 -- Konfiguration der Tabelle ausgeben
 --DESCRIBE EXTENDED t_rawMetaMatch;
 --DESCRIBE EXTENDED t_rawMetaPlayer;
