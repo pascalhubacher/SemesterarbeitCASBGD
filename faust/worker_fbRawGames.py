@@ -20,7 +20,7 @@ def ballPossession(playerId, ballId, distance=3):
 def euclidianDistance(point1, point2):
     return(math.sqrt((float(point1[0]) - float(point2[0]))**2 + (float(point1[1]) - float(point2[1]))**2 + (float(point1[2]) - float(point2[2]))**2))
 
-#calculates the delta of x,y,z and the timedifference in microseconds
+#calculates the delta distance of x,y,z 
 def calcDeltaDistance(pointNew, pointOld):
     #point1 and 2 must be formatted as a set like this (x, y, z)
     #x, y, z float
@@ -36,23 +36,24 @@ def calcDeltaTime(timestampNew, timestampOld):
     # ts -> deltatime in microseconds
     return((datetime.strptime(str(timestampNew), '%Y.%m.%dT%H:%M:%S.%f')-datetime.strptime(str(timestampOld), '%Y.%m.%dT%H:%M:%S.%f')).microseconds)
 
-#calculates the velocity -> math: velocity = delta distance / delta time (linear velocity)
+#calculates the velocity -> math: velocity = delta distance [m] / delta time [s] (linear velocity)
 def calcVelocity(pointNew, pointOld):
     #point1 and 2 must be formatted as a set like this (x, y, z, ts)
-    timeDelta = calcDeltaTime(pointNew[3],pointOld[3])
+    #timeDelta is in microseconds
+    timeDelta = calcDeltaTime(pointNew[3],pointOld[3])/1000/1000
     #timedelta must be bigger than 0
     if float(timeDelta) > 0:
-        return(euclidianDistance((pointNew[0], pointNew[1], pointNew[2]), (pointOld[0], pointOld[1], pointOld[2]))/timeDelta/1000/1000)
+        return(euclidianDistance((pointNew[0], pointNew[1], pointNew[2]), (pointOld[0], pointOld[1], pointOld[2]))/(timeDelta))
     else:
         return('NaN')
 
-#calculates the acceleration -> math: acceleration = delta velocity / delta time (linear acceleration)
+#calculates the acceleration -> math: acceleration = delta velocity [m/s]/ delta time [s] (linear acceleration)
 def calcAcceleration(advancedInfoNew, advancedInfoOld):
     #point1 and 2 must be formatted as a set like this 
     #ts [str], velocity [float], acceleration[float], distance[str], directionVector[set], id[int], matchid[int])
 
     #returns float [m/s^2]
-    return((advancedInfoNew.velocity - advancedInfoOld.velocity) / calcDeltaTime(advancedInfoNew.ts, advancedInfoOld.ts))
+    return((advancedInfoNew.velocity - advancedInfoOld.velocity) / (calcDeltaTime(advancedInfoNew.ts, advancedInfoOld.ts)/1000/1000))
 
 #GLOBALS
 ballPossessionDistance = 3
