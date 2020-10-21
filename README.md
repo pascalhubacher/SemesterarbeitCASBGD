@@ -288,3 +288,66 @@ komplexe Operationen (Aggregationen, Joins, Windowing) auf SQL-Basis
 durchgeführt werden. Der kSQL Server lässt sich auch mittels RestAPI
 ansprechen, so dass SQL-Statements einfach in Python abgesetzt werden
 können.
+
+## Kafka Modellierung
+
+### Überblick
+
+Kommen wir zum Kernstück unserer Semesterarbeit. Die Modellierung der
+Stream-Verarbeitung in Kafka mit den Topics, Streams, Tabellen und
+Worker.
+
+Das folgende Schema zeigt uns das Zusammenspiel dieser verschiedenen
+Objekte und den Weg von den Rohdaten aus dem Simulator zu den beiden
+Haupt-Events «BallInZone» und «BallPossession», die je durch einen
+separaten Consumer ausgelesen werden.
+
+![](./media/image8.jpeg)
+
+Initial werden mit Hilfe eines KSQL-Scripts die Topics, Streams und
+Tabellen erstellt und anschliessend, auch via KSQL-Script, die
+Meta-Spieldaten (Spielfeld- und Sensorinformationen) eingefügt. Wir
+unterscheiden zwischen den statischen Meta-Spieldaten und den
+Sensordaten (Positionsdaten) ab dem Simulator. Um in KSQL Daten via
+Stream oder Tabelle zu verarbeiten, muss die Datenstruktur der Topics
+definiert werden. Dies erfolgt in unserer Implementation durch das
+Statement CREATE STREAM oder CREATE TABLE.
+
+### Use Cases
+
+#### Ball in Zone -- fbBallInZoneEvent
+
+Tritt der Ball in eine Spielfeldzone ein oder verlässt diese, wird eine
+Message in das Topic *fbBallInZoneEvent* geschrieben.
+
+Die Event-Detection erfolgt über zwei Schritte
+
+1.  STREAM s_fbBallInZone: Datenstrom nach Ball filtern und aktuelle
+    Zone feststellen
+
+2.  WORKER worker_fbBallInZone: Zonenwechsel feststellen
+
+![](./media/image11.jpeg)
+
+#### Ballbesitz -- fbBallPossessionEvent
+
+Der Ballbesitz Event besteht aus den Spielerinformationen in der Tabelle
+«rawMetaPlayer» und der Auswertung der Spieler- und Ballpositionsdaten
+aus dem Stream «rawGames».
+
+![](./media/image17.jpeg)
+
+Visualisierung/Test
+-------------------
+
+Zur einfachen Überprüfung unserer Event-Detection werden die Events
+zusammen mit dem Video des Spies am Bildschirm gemeinsam angezeigt. Dazu
+werden die Consumer auf die Event-Topics «fbBallInZoneEvent» und
+«fdBallPossessionEvent» sowie das Input-Topic «rawGames» in separaten
+Terminalfenster geladen. Anschliessend wird der Input-Stream über den
+Simulator gemeinsam mit dem Video gestartet. Die Events werden bei
+auftreten sofort im entsprechenden Terminalfenster dargestellt. So kann
+die visuelle Überprüfung der Richtigkeit der Events gewährleistet
+werden.
+
+![](./media/image20.png)
