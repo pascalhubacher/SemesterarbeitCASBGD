@@ -50,6 +50,9 @@ Simulator-Scripts in das System eingespeist.
 Beispieldaten (CSV); Positionsdaten eines Spielers mit drei Messwerten:
 
 Timestamp,\"X\",\"Y\",\"Z\",\"ID\"
+
 40,50.92,1.15,0.0,101
+
 80,50.86,1.16,0.0,101
+
 120,50.79,1.14,0.0,101
