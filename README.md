@@ -66,5 +66,33 @@ Der Ursprung des Koordinatensystems liegt auf dem Spielfeldmittelpunkt.
 
 ![](./media/image4.png)
 
-Folgende Fixpunkte ergeben sich aus dem vorliegenden Koordinatensystem
-und den Spielfelddimensionen.
+**Wichtig**: Die Spielfeldgrösse (Länge und Breite) ist nicht fix
+definiert, sondern kann in einem reglementarisch definierten Bereich
+variieren. Die Grösse von Strafraum, Torraum und Tor ist jedoch fix
+definiert.
+
+Die offizielle Vermassung und die Beschreibung des Fussballfelds sind
+auf Wikipedia[^2] zu finden.
+
+## Events
+
+Auf Basis der Positionsdaten der Spieler und des Balls werden
+verschiedene Ereignisse erkannt (Event detection). Events können von der
+absoluten Spielfeldposition, Laufrichtung und Geschwindigkeit eines
+Objekts abhängig sein, der relativen Geschwindigkeit oder des Abstands
+zweier Objekte untereinander. Diese Zustände werden dann meist auch in
+Abhängigkeit der Zeit betrachtet.
+
+Zum Beispiel ein Ballbesitz kann definiert werden durch einen minimalen
+Abstand zwischen zwei Objekten (Ball und Spieler) und der gleichen
+Bewegungsrichtung.
+
+Wir unterscheiden zwischen einfachen Events und komplexen Events.
+
+-   Einfache Events: Ein Ereignis trifft ein, unabhängig von anderen
+    Ereignissen. Zum Beispiel ein Objekt betritt oder verlässt eine
+    bestimmte Spielfeldzone
+
+-   Complex Event: Erkennung von Ereignismustern. Einfache Events werden
+    zu Gruppen zusammengefasst und bilden ein übergeordnetes Ereignis.
+    Mehrere Objekte stehen in Beziehung zueinander.
