@@ -1,6 +1,6 @@
 # Semesterarbeit CAS BGD FS20
 
-**Stream-Processing als Basis für die taktische Analyse im Spitzenfussball**
+# Stream-Processing als Basis für die taktische Analyse im Spitzenfussball
 
 ![](./media/image1.jpg)
 
