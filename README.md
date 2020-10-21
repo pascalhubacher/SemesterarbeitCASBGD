@@ -1,5 +1,9 @@
 # Semesterarbeit CAS BGD FS20
 
+**Stream-Processing als Basis für die taktische Analyse im Spitzenfussball**
+
+![](./media/image1.jpg)
+
 ## Intro
 Im Spitzenfussball gehört es heute zum Standard, dass die Spielerdaten während eines Spiels auf-gezeichnet und ausgewertet werden. Nach dem Spiel können so Leistungsdaten je Spieler (Lauf-wege, Ballkontakte, gewonnene/verlorene Zweikämpfe etc.) ermittelt werden. Ein immer wichtigerer Teil nimmt dabei die Analyse von Datenströmen zu Echtzeit ein.
 Im Rahmen dieser Semesterarbeit wollen wir die einzelne Komponente der Stream-Analyse und der Event-Detection an konkreten Spieldaten anzuwenden und erste Erfahrungen zu sammeln.
@@ -56,3 +60,11 @@ Timestamp,\"X\",\"Y\",\"Z\",\"ID\"
 80,50.86,1.16,0.0,101
 
 120,50.79,1.14,0.0,101
+
+### Fussballfeld Koordinatensystem
+Der Ursprung des Koordinatensystems liegt auf dem Spielfeldmittelpunkt.
+
+![](./media/image4.png)
+
+Folgende Fixpunkte ergeben sich aus dem vorliegenden Koordinatensystem
+und den Spielfelddimensionen.
