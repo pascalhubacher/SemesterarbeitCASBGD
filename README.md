@@ -120,3 +120,99 @@ Meter sein und kein anderer Spieler näher beim Ball sein. Weiter muss
 der Spieler innerhalb eines Zeitfensters von 1 Sekunde diesen Zustand
 mehr als die Hälfte der Zeit innehalten.
 
+## Infrastruktur
+
+### Übersicht
+
+Damit eine Umgebung ohne grosse Vorkenntnisse eingesetzt werden kann,
+ist es wichtig, dass der Aufbau derselben einfach und fehlerresistent
+ist. Bereits in einer vorangegangenen Arbeit wurde eine Umgebung
+aufgebaut für die Analyse von Fussball Stream Daten. Diese wurde jedoch
+lokal auf einem Server installiert und konnte nach der Arbeit nicht mehr
+migriert und weiterverwendet werden.
+
+Deshalb ist es ein Kernthema dieser Arbeit, dass die ganze Umgebung
+folgende Eigenschaften haben muss:
+
+-   Betriebssystemneutral
+
+-   Einfach portierbar (Lokal/Cloud)
+    > Minimalinstallation: Laptop (32GB RAM, Mehrere CPU Kerne)\
+    > Maximalinstallation: Server oder Cloud Implementation
+
+-   Schnell einsetzbar (30min)
+
+-   Geringer Speicherbedarf
+
+-   Einfache Erweiterbarkeit (Modularer Aufbau, Python, KSQL)
+
+-   Einfache Entwicklung mit GitHub (Multiuserfähig, Änderungen
+    nachverfolgbar)
+
+-   Einfache Automatisierung
+
+-   Kostengünstig
+
+-   Enterprise Support
+
+Aufgrund dieser Anforderungen haben wir uns für Docker entschieden.
+Docker lässt sich auf allen gängigen OS installieren. Die Kommandos sind
+fast identisch in der Anwendung.
+
+Die hier verwendete Minimalumgebung wird mittels docker-compose
+erstellt. Dabei werden die angepassten Images mittels Docker File
+erstellt. Somit ist die ganz Umgebung einfach portierbar und
+erweiterbar.
+
+Die ganze Semesterarbeit[^3] ist eine Teamarbeit und bedarf, dass jede
+Person jederzeit am Projekt arbeiten kann. Deshalb ist die ganze
+Umgebung auf GitHub abgelegt und wird auch dort gepflegt.
+
+Auf Windows 10 setzen wir GitHub Desktop ein und als Programmierumgebung
+dient Visual Studio Code mit Python 3.7.
+
+### Docker
+
+Damit Docker verwendet werden kann, muss erst die Docker Umgebung
+installiert werden. Diese beinhaltet den Docker Server (Docker Prozess)
+und den Docker Client (Docker CLI). Mit dieser CLI (Docker und
+Docker-Compose) kann anschliessend die ganze Umgebung betrieben werden.
+
+Docker stellt eine Virtualisierung mittels Container dar. Die Container
+sind jedoch keine volle OS Virtualisierung und deshalb ist deren
+Platzbedarf meist massiv kleiner. Die Container werden immer aus einem
+Image gestartet. Das Image stellt ein Filesystem Snapshot einer Unix
+Umgebung dar.
+
+Der Docker Hub stellt eine Vielzahl von offiziellen Images und auch
+selbstkreierten Images (keine Qualitätskontrolle) bereit, welche direkt
+mittels Docker CLI heruntergeladen werden können.
+
+Ein Docker Hub Image dient meist als Basis und wird anschliessend
+mittels einer deklarativen Konfigurationsdatei (DOCKERFILE) für die
+weitere Verwendung angepasst und kann danach wieder als eigenes Image
+lokal abgespeichert werden. Die Container sind untereinander
+abgeschottet. Wollen die Container miteinander kommunizieren, müssen sie
+dies über freigegebene TCP/IP Ports tun oder den Containern wird ein
+geteiltes Verzeichnis im Container angehängt.
+
+Damit nun eine ganze Umgebung, bestehend aus mehreren Containern,
+einfach aufgebaut werden kann, braucht es die Docker-Compose CLI. Mit
+dem Docker-Compose Kommando kann mittels einer deklarativen
+Konfigurationsdatei (Docker-Compose.VML) eine ganze Umgebung in einem
+gemeinsamen Netzwerk aufgebaut werden. Diese Umgebung kann danach als
+Ganzes gestartet, gestoppt, neu aufgebaut oder abgebaut werden.
+
+### Docker Umgebung
+
+Die verwendete Docker Umgebung basiert auf der Docker-Compose[^4] Datei
+von Guido Schmutz. Aufgrund dessen war es uns möglich, innerhalb
+kürzester Zeit eine lauffähige Kafka Umgebung bereitzustellen.
+
+Die Docker Umgebung ist in ein internes und ein externes Netzwerk
+unterteilt (Internal_IP, External_IP), damit die gesamte Umgebung auch
+sicher in der Cloud laufen kann. Durch die Unterteilung ist es möglich,
+gewisse Ports der Applikationen nur im Docker Netzwerk verfügbar zu
+machen und nur die zwingend benötigten Ports nach aussen zu öffnen.
+
+![](./media/image5.png)
