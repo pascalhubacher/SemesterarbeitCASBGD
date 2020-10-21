@@ -50,38 +50,6 @@ Simulator-Scripts in das System eingespeist.
 Beispieldaten (CSV); Positionsdaten eines Spielers mit drei Messwerten:
 
 Timestamp,\"X\",\"Y\",\"Z\",\"ID\"
-
 40,50.92,1.15,0.0,101
-
 80,50.86,1.16,0.0,101
-
 120,50.79,1.14,0.0,101
-
-Ein Datenpaket (Zeile) je Objekt umfasst folgende Informationen:
-
-[]{#_Toc52468119 .anchor}Tabelle : Input Daten Informationen
-
-+-----------+----------+---------------------------------------------+
-| Datenfeld | Datentyp | Beschreibung                                |
-+===========+==========+=============================================+
-| Timestamp | Integer  | Synchronisierter Zeitstempel in \[ms\] für  |
-|           |          | alle Objekte eines Spiels; Start bei 0;     |
-|           |          | Frequenz 25 Hz                              |
-+-----------+----------+---------------------------------------------+
-| X         | Float    | X-Achsenwert der Objektposition in Meter    |
-|           |          | \[m\]                                       |
-+-----------+----------+---------------------------------------------+
-| Y         | Float    | Y-Achsenwert der Objektposition in Meter    |
-|           |          | \[m\]                                       |
-+-----------+----------+---------------------------------------------+
-| Z         | Float    | Nicht verwendet; fix 0                      |
-+-----------+----------+---------------------------------------------+
-| ID        | Integer  | SensorId; Eindeutige Kennung des Objekts    |
-|           |          | (Spieler, Ball)                             |
-|           |          |                                             |
-|           |          | Konvention:                                 |
-|           |          |                                             |
-|           |          | ID \< 100 Spieler Heimteam\                 |
-|           |          | ID \> 100 Spieler Gastteam\                 |
-|           |          | ID = 200 Ball Ball                          |
-+-----------+----------+---------------------------------------------+
