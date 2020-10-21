@@ -10,16 +10,16 @@ als «Informatiker». Uns ist wichtig zu erfahren, wie mit den Werkzeugen
 eines Data Scientist eine Stream-Verarbeitung sinnvoll gestaltet werden
 kann. Der Fokus liegt dabei auf folgenden Themen:
 
--   Event-Detection\
+-   Event-Detection
     > Erkennen von Spielsituationen auf Basis der Positionsdaten (x/y)
     > von Spieler und Ball
 
--   Einsetzen von Stream Processing Tools\
+-   Einsetzen von Stream Processing Tools
     > Anwenden von ksql und Python/Faust (Data Scientist Toolset) sowie
     > die Einbindung bereits bekannter Technologien (C\#/.net)
 
 -   Erstellen von Producer und Consumer
-    Input: Sensorsimulator (Python)\
+    Input: Sensorsimulator (Python)
     Output: Datenablage in externer Datenbank (.net)
 
 -   Aufbau Kafka-Streaming-Plattform
