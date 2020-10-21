@@ -18,11 +18,11 @@ kann. Der Fokus liegt dabei auf folgenden Themen:
     > Anwenden von ksql und Python/Faust (Data Scientist Toolset) sowie
     > die Einbindung bereits bekannter Technologien (C\#/.net)
 
--   Erstellen von Producer und Consumer\
+-   Erstellen von Producer und Consumer
     Input: Sensorsimulator (Python)\
     Output: Datenablage in externer Datenbank (.net)
 
--   Aufbau Kafka-Streaming-Plattform\
+-   Aufbau Kafka-Streaming-Plattform
     Im Zentrum steht die Systembereitstellung in einer
     Entwicklungsumgebung auf einem lokalen Windows-System, basierend auf
     Docker. Die Partitionierung und Replikation der Daten steht dabei
