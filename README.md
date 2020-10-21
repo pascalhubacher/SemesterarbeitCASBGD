@@ -96,3 +96,27 @@ Wir unterscheiden zwischen einfachen Events und komplexen Events.
 -   Complex Event: Erkennung von Ereignismustern. Einfache Events werden
     zu Gruppen zusammengefasst und bilden ein übergeordnetes Ereignis.
     Mehrere Objekte stehen in Beziehung zueinander.
+
+### Liste der Events
+
+Die folgenden Events werden im Rahmen dieser Arbeit aus den Datenströmen
+gefiltert.
+
+#### Einfache Events; Zoneninformationen
+
+Anhand der eingangs beschriebenen Spielfeldzonen wird erkannt, wann der
+Ball eine definierte Zone verlässt oder in sie eindringt. Die
+Ballposition(x/y) wird mit den Zonenkoordinaten
+verglichen(x~min~/y~min~; x~max~/y~max~)
+
+#### Complex Events; Ballbesitz
+
+Der Ball ist das zentrale Objekt. Seine Position (x/y) wird mit den
+Positionen der Spieler(x/y) über einem bestimmte Zeitpunkt verglichen.
+
+Erkennt, ob ein Spieler im Ballbesitz ist und es vorher nicht war. Damit
+dieser Event anschlägt, muss die Distanz des Spielers zum Ball unter 3
+Meter sein und kein anderer Spieler näher beim Ball sein. Weiter muss
+der Spieler innerhalb eines Zeitfensters von 1 Sekunde diesen Zustand
+mehr als die Hälfte der Zeit innehalten.
+
