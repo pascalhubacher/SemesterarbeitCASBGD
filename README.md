@@ -1,4 +1,5 @@
 # Semesterarbeit CAS BGD FS20
+Beat Suter und Pascal Hubacher
 
 # Stream-Processing als Basis für die taktische Analyse im Spitzenfussball
 
@@ -270,3 +271,20 @@ kann es fast beliebig viele Kafka Broker geben. Kafka (Zookeeper)
 definiert selber, auf welchem Broker welche Daten abgespeichert werden.
 Dies geschieht automatisch nach vorgegebenen Regeln (Round Robin, Sticky
 Routing).
+
+#### Kafka Web UI (akhq)
+
+Dieses Image dient dazu, mittels Web UI die Kafka Umgebung anzuschauen
+(Nodes, Topics) und bei Bedarf anzupassen. In unserer aufgebauten
+Umgebung ist der Web UI Port im externen Netzwerk sichtbar und dadurch
+lässt sich die Umgebung praktisch überwachen und anpassen. Im Browser
+lässt sich die Kafka Umgebung wie folgt aufrufen:
+<http://localhost:28107/docker-kafka-server/node>.
+
+#### Kafka kSQL Server (ksqldb-server-1)
+
+Der kSQL Server ist die SQL Engine für Kafka. Mit kSQL können nun
+komplexe Operationen (Aggregationen, Joins, Windowing) auf SQL-Basis
+durchgeführt werden. Der kSQL Server lässt sich auch mittels RestAPI
+ansprechen, so dass SQL-Statements einfach in Python abgesetzt werden
+können.
