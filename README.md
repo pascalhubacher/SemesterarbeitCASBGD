@@ -19,11 +19,11 @@ kann. Der Fokus liegt dabei auf folgenden Themen:
     > die Einbindung bereits bekannter Technologien (C\#/.net)
 
 -   Erstellen von Producer und Consumer
-    Input: Sensorsimulator (Python)
-    Output: Datenablage in externer Datenbank (.net)
+    > Input: Sensorsimulator (Python)
+    > Output: Datenablage in externer Datenbank (.net)
 
 -   Aufbau Kafka-Streaming-Plattform
-    Im Zentrum steht die Systembereitstellung in einer
+    > Im Zentrum steht die Systembereitstellung in einer 
     Entwicklungsumgebung auf einem lokalen Windows-System, basierend auf
     Docker. Die Partitionierung und Replikation der Daten steht dabei
     nicht im Fokus.
