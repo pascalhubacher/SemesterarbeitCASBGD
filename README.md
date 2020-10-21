@@ -216,3 +216,57 @@ gewisse Ports der Applikationen nur im Docker Netzwerk verfügbar zu
 machen und nur die zwingend benötigten Ports nach aussen zu öffnen.
 
 ![](./media/image5.png)
+
+#### Game Simulator (simulator-1)
+
+Der «Game Simulator» dient dazu, die in unserer Semesterarbeit
+verwendeten Fussballspieldaten in Echtzeit an Kafka zu senden.
+Die Events werden im JSON Format versendet. Das verwendete Schema dazu
+wird nicht in der Schema Registry gespeichert und muss deshalb in jedem
+«Consumer/Producer» neu angegeben werden.
+
+#### Faust worker (faust-1)
+
+Der Faust Container wird verwendet um sogenannte «Worker» auszuführen.
+Worker lesen die Messages ab einem dedizierten Topic, führen eine meist
+komplexere Verarbeitung durch und generieren mit dem Resultat eine neue
+Message in ein weiteres Topic.
+
+Der Vorteil eines solchen Workers ist, dass Streams und Tables dadurch
+relativ einfach programmiert werden können. Durch den Einsatz einer
+Programmiersprache ist es einfach, zum Beispiel die Distanz anhand der
+X/Y Koordinaten in zwei Messages zu berechnen. Dies wäre mittels KSQL
+komplexer umzusetzen.
+
+Als Standard gilt hier Kafka Streams. Kafka Streams unterstützt jedoch
+nur die Programmiersprachen Java und Scala. Als Alternative für die
+Worker-Umsetzung bietet sich Python mit der Faust-Library[^6] an. Für
+den Data Scientist eine äusserst spannende Alternative, für welche wir
+uns in unserem Projekt entschieden und erfolgreich eingesetzt haben.
+
+Faust ist eine Stream Processing Bibliothek, welche die Ideen von Kafka
+Streams nach Python portiert hat. Mittels Faust ist es relativ simpel,
+aus Topics und Tabellen zu lesen und zu schreiben.
+
+Die einzelnen Faust Apps kreieren im Hintergrund ein «changelog» Topic
+in Kafka für seine geführten Tabellen, damit beim Absturz eines Workers
+die Daten nicht verloren gehen und beim Neustart des Workers abgeglichen
+werden können. Dadurch kann der Faust-Worker mit Kafka
+Verbindungsverlusten und Problemen der Faust App umgehen.
+
+#### Zookeeper (zookeeper-1)
+
+Der Zookeeper (kann auch mehrere Nodes davon geben) fungiert als Hirn
+der Kafka Umgebung. Ohne Zookeeper funktioniert die Kafka Umgebung
+nicht. Der Zookeeper Service ist verantwortlich, dass die Namens- und
+Konfigurationsinformationen auf dem verteilten System synchronisiert
+werden. Zookeper überwacht den Status der Kafka Nodes, Topics und
+Partitions.
+
+#### Kafka Broker (kafka-1)
+
+Der Kafka Broker speichert die Daten. In einer verteilten Kafka Umgebung
+kann es fast beliebig viele Kafka Broker geben. Kafka (Zookeeper)
+definiert selber, auf welchem Broker welche Daten abgespeichert werden.
+Dies geschieht automatisch nach vorgegebenen Regeln (Round Robin, Sticky
+Routing).
