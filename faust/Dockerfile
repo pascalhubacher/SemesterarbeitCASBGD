@@ -1,6 +1,6 @@
 ###############################################################################
 # use an existing docker image 
-FROM python:3
+FROM python:3.7
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
