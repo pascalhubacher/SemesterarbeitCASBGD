@@ -14,7 +14,7 @@
 #---------------------
 #open browser
 #AKHQ - Kafka Environment
-#http://localhost:28107/docker-kafka-server/topic
+#http://localhost:28107/
 #---------------------
 #to show the raw Messages from the simulator that come
 #docker exec -ti kafkacat sh
