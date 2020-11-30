@@ -304,7 +304,7 @@ services:
               schema-registry:
                 url: "http://schema-registry-1:8081"
               connect:
-                url: "http://kafka-connect-1:8083"
+                - url: "http://kafka-connect-1:8083"
     depends_on:
       - kafka-1
     volumes:
